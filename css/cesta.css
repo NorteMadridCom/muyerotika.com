@@ -1,0 +1,159 @@
+td{
+	color: #000;
+}
+
+table.cesta_compra {
+	float: left;
+	font-size: 13px;
+	width: 380px;
+}
+
+input.datos_cesta{
+	width: 250px;
+	height: 15px;
+	border: none;
+	background-color: #eee;
+}
+
+.cesta_compra td {
+	background-color: #eee;
+	text-align: center;
+	padding: 2px 5px;
+}
+.cesta_compra thead td {
+	background-color: #ddd;
+}
+.cesta_compra td.editable {
+	background-color: #fff;
+	border: 1px solid  #eee;
+}
+.cesta_compra td.blanco {
+	background-color: #fff;
+	border: none;
+}
+.tam_80 {
+	 color: #000;
+	width: 80px;
+	overflow: hidden;
+}
+.tam_200 {
+	 color: #000;
+	width: 290px;
+	overflow: hidden;
+}
+.tam_40 {
+	 color: #000;
+	width: 50px;
+	overflow: hidden;
+	height: 30px;
+}
+.cesta_compra thead td.izq {
+	text-align: left;
+}
+.dcha {
+	text-align: right;
+}
+textarea.observaciones {
+	background-color: none;
+	border: 1px solid  #eee;
+	width: 420px;
+	border-radius: 5px;
+	height: 60px;
+}
+input.uds {
+	border: none;
+	text-align: right;
+	font-size: 12px;
+	width: 50px;
+}
+
+input.bt_actualizar{
+	background-image: url('../img/bt-actualizar.png') no-repeat; 
+	width: 16px;
+	height: 16px;
+}
+input.bt_eliminar{
+	background-image: url('../img/bt-eliminar.png') no-repeat; 
+	width: 16px;
+	height: 16px;
+}
+p.txt_datos{
+	color: #666;
+}
+a.legales{
+	font-weight: bold;
+	color: #666;
+}
+a.legales:hover{
+	text-decoration: underline;
+}
+
+button.grabar{
+	background-color: #c9424f;
+	width: 200px;
+	color: #fff;
+	font-family: 'erotika';
+ 	font-size: 20px;
+ 	padding: 5px 10px 5px 10px;
+ 	margin-right: -5px;
+ 	border: none;
+}
+
+a#bt_compras{
+	background-color: #c9424f;
+	width: 150px;
+	color: #fff;
+	font-family: 'erotika';
+ 	font-size: 20px;
+ 	padding: 5px 10px 5px 10px;
+ 	margin-right: 158px;
+}
+
+input#bt_compras{
+	background-color: #c9424f;
+	width: 150px;
+	color: #fff;
+	font-family: 'erotika';
+ 	font-size: 20px;
+ 	padding: 5px;
+ 	height: 34px;
+ 	border: none;
+}
+
+form.datos{
+	clear: both;
+	margin: 0px 0px 50px 220px;
+}
+
+a.bt_seguir_comprando{
+	background-color: #c9424f;
+	width: 150px;
+	color: #fff;
+	font-family: 'erotika';
+ 	font-size: 20px;
+ 	padding: 5px;
+ 	height: 34px;
+}
+
+form.botones_debajo{
+	margin-top: 50px;
+	margin-bottom: 50px;
+}
+
+input.vaciar_cesta{
+	margin-top: 20px;
+}
+
+#cesta_compra_bloque{
+	margin-left: 582px;
+	background-color: #fff;
+	position: absolute;
+	width: 400px;
+	padding: 20px 0px 0px 20px;
+	margin-top: 40px;
+	border-radius: 5px;
+	z-index: 999;
+	-webkit-box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.20);
+	-moz-box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.20);
+	box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.20);
+}

@@ -1,0 +1,1496 @@
+<?php
+
+require_once 'navegacion.php';
+require_once 'submenu.php';
+require_once 'producto.php';
+require_once 'seleccion_familias.php';
+require_once 'editar_productos.php';
+require_once 'sincronizacion_productos.php';
+require_once 'buscador.php';
+require_once 'editar_fabricantes.php';
+require_once 'editar_categorias.php';
+require_once 'editar_destacados.php';
+require_once 'seleccion_fabricantes.php';
+require_once 'poner_productos.php';
+require_once 'editar_clientes.php';
+require_once 'editar_tarifas.php';
+require_once 'editar_grupos.php';
+require_once 'editar_descuentos.php';
+require_once 'ckeditor/ckeditor.php';
+require_once 'relacionados.php';
+require_once 'precio_minimo.php';
+require_once 'pedido.php';
+require_once 'pedido_pdf.php';
+require_once 'editar_pedidos.php';
+require_once 'disponibilidad.php';
+require_once 'editar_envios.php';
+
+
+
+
+if (!$_GET['seccion']) {
+	
+	$div="navegacion";
+	$class="navegacion";
+	
+	//$navegacion=new Barra($div,$class,'<img src="img/icono-casa.png" alt="icono link a portada - categorÃÂ­as - Dizma S.L" border="0" width="20">',false,'<img src="img/flecha.png" />');
+	//echo '<span class="inicial">hola</span>';
+	$navegacion=new Barra($div,$class,'Inicio',false,'<img src="img/flecha.png" class="navegacion" height="24" />');
+	echo $navegacion;
+	
+}
+
+if(!$_GET['index']) $_GET['index'] = 0; //necesario para el paginador
+
+if($_GET['seccion']!='buscar') unset($_SESSION['sql_busqueda']);
+if($_GET['subseccion']!='Buscar') unset($_SESSION['sql_busqueda_admin']);
+
+
+//hay un problema con imagen, realiza la sincronizacion deberí­a 
+//solo cargar la imagen donde debe y no recargar la imagen
+//no se puede hacer con display:none; en css tb requiere de recarga
+//mirar un jquery
+
+//var_dump($_SESSION);
+
+if($_GET['seccion']=='cesta') {
+	
+	echo '<div id="editar_productos">';
+	$mostar_cesta = new Mostrar_cesta;
+	$mostar_cesta->formulario();
+	echo '</div>';
+	
+} elseif($_GET['seccion']=='pago') {
+	
+	//ir a la plataforma de pago y si es correcto guardar el momento de la confirmaciÃ³n del pago.
+	//hay dos scripts mas, uno que realiza el cambio en base datos con aceptada o rechazada (pudede ser el mismo o podemos hacerlo aqui mismo)
+	if($_SESSION['sesion_registrada']) {
+		$pedido = new Pedido();
+		if($_GET['respuesta']=='ok') {
+			$pedido->aceptado();
+		} elseif($_GET['respuesta']=='ko') {
+			//hay que ver que no nos ducplique el pedido
+			echo "Su pago ha sido rechazado. Puede volver a intentarlo con otra tarjeta o realizar el pago mediante transferencia.<br>";
+			$pedido->pedido();
+		} elseif($_GET['respuesta']=='Transferencia') {
+			$pedido->aceptado();
+		} else $pedido->pedido();
+	} else {
+		require 'formulario_eleccion_registro.php';
+	}
+	
+	/*
+	 * lo que se muestra a continuación es solo para modo local depueracion, 
+	 * lo correcto es lo de arriba
+	 * 
+	*/
+	
+	/*
+	$pedido = new Pedido();
+	$pedido->pedido();
+	$ped = new Mysql;
+	$ped_sql="UPDATE pedidos SET pago='$fecha_pago' WHERE idpedido={$_SESSION['datos_cesta']['no_pedido']};";
+	$ped->resultado_consulta($ped_sql);	
+	$pedido->aceptado();
+	*/
+
+} elseif($_GET['seccion']=='pedidos' && $_SESSION['tipo_cliente']=='administrador') { 
+	
+	//en esta seccion harÃ­a falta la posibilidad de con sulta de pedidos por cada uno de los clientes por ellos mismos
+	//para tener su histÃ³rico
+	echo '<div id="editar_productos">';
+	$editar_pedidos = new Editar_pedidos();
+	$funcion=strtolower( $_POST['accion']);
+	if($_POST['accion']=='email' && $_POST['idpedido']) {
+		$editar_pedidos->email($_POST['idpedido'],$_POST['mes']);
+	} elseif($_POST['accion']) {		
+		if(method_exists($editar_pedidos, $funcion)) $editar_pedidos->$funcion($_POST['idpedido']);
+		else $editar_pedidos->formulario_pedidos();
+	} else $editar_pedidos->formulario_pedidos();
+	echo '</div>';
+	
+} elseif($_GET['seccion']=='editar_fabricantes' && $_SESSION['tipo_cliente']=='administrador') { 
+
+	echo '<div id="editar_productos">';
+	$editar_fabricantes = new Editar_fabricantes();
+	
+	if($_POST['accion']=='Nuevo' || $_POST['accion']=='Editar') {
+		
+		$editar_fabricantes->editar_fabricante((object) $_POST);
+		
+	} elseif($_POST['accion']=='Eliminar') {
+		
+		$editar_fabricantes->eliminar_fabricante((object) $_POST);
+		
+	} elseif($_POST['accion']=='Ordenar_fabricante') {
+		
+		echo '<p>ORDENAR MARCAS</p>';		
+		$ordenar_marcas = new Ordenar('fabricantes','idfabricante','fabricante_menu');
+		if($_POST['ordenar']=='Ordenar') {
+			$ordenar_marcas->ordenacion();
+		}
+		$ordenar_marcas->__destruct();
+			
+	} elseif($_POST['accion']=='Ordenar_linea') {	
+
+		echo '<p>ORDENAR LÍNEAS</p>';
+		$ordenar_linea = new Ordenar('lineas','idlinea','linea_menu', 'eliminado', 'orden', "idfabricante = {$_POST['idfabricante']} AND linea != '0'");
+		if($_POST['ordenar']=='Ordenar') {
+			$ordenar_linea->ordenacion();
+		}
+		$ordenar_linea->__destruct();	
+	
+	} else {
+			
+		$editar_fabricantes->formulario_general();
+	}
+	
+	echo '</div>';
+	
+	
+	
+	
+} elseif($_GET['seccion']=='editar_destacados' && $_SESSION['tipo_cliente']=='administrador') { 
+
+	echo '<div id="editar_productos">';
+	
+	$categorias = new Editar_destacados($config);
+	
+	if($_POST['accion']=='Eliminar') {
+		
+		$categorias->eliminar($_POST);
+		
+	} elseif($_POST['accion']=='Productos') {
+		
+		$categorias->agregar_productos($_POST);
+		
+	} elseif($_POST['accion']=='Portada') {
+		
+		$categorias->portada($_POST);
+		
+	} elseif($_POST['accion']=='Ordenar') {
+		
+		$orden = new Ordenar($tabla='familias_web',$id="idfamilia_web",$mostrar="familia_web_menu");
+		if($_POST['ordenar']=='Ordenar') {
+			$orden->ordenacion();
+		}
+		$orden->__destruct;
+		
+	} elseif($_POST['accion']) {
+
+		$categorias->editar($_POST);
+
+	} else {
+		
+		$categorias->formulario_general();
+	}
+	
+	echo '</div>';
+	
+} elseif($_GET['seccion']=='editar_categorias' && $_SESSION['tipo_cliente']=='administrador') { 
+	//desde el menu principal, ha de aparece el boton de editar y añadir
+	/****************************************************
+	* recordemos que un 0 en sub-familia => 0 en subsub
+	* no pondresmos un 0 sino sin cateforias
+	*****************************************************/ 
+	//var_dump($_POST);
+	echo '<div id="editar_productos">';
+	
+	$categorias = new Editar_categorias($config);
+	
+	if($_POST['accion']=='Eliminar') {
+		
+		$categorias->eliminar($_POST);
+		
+	} elseif($_POST['accion']=='Editar') {
+		//estamos en editar
+		//mucho ojo con la opcion sin subs, que han de borrar si existen las subs
+		$categorias->editar($_POST);
+		
+	} elseif($_POST['accion'] == 'Nuevo') {
+		
+		$categorias->editar($_POST);
+		
+	} elseif($_POST['accion'] == 'Ordenar_familia') {
+		
+		echo '<p>ORDENAR FAMILIAS</p>';		
+		$ordenar_familia = new Ordenar('familias','idfamilia','familia_menu');
+		if($_POST['ordenar']=='Ordenar') {
+			$ordenar_familia->ordenacion();
+		}
+		$ordenar_familia->__destruct();	
+	
+	} elseif($_POST['accion'] == 'Ordenar_subfamilia') {
+		
+		echo '<p>ORDENAR SUBFAMILIA</p>';
+		$ordenar_subfamilia = new Ordenar('subfamilias','idsubfamilia','subfamilia_menu', 'eliminado', 'orden', "idfamilia = {$_POST['idfamilia']} AND subfamilia != '0'");
+		if($_POST['ordenar']=='Ordenar') {
+			$ordenar_subfamilia->ordenacion();
+		}
+		$ordenar_subfamilia->__destruct();	
+		
+	} elseif($_POST['accion'] == 'Ordenar_subsubfamilia') {
+		
+		echo '<p>ORDENAR SUBSUBFAMILIA</p>';
+		$ordenar_subsubfamilia = new Ordenar('subsubfamilias','idsubsubfamilia','subsubfamilia_menu', 'eliminado', 'orden', "idsubfamilia = {$_POST['idsubfamilia']} AND subsubfamilia != '0'");
+		if($_POST['ordenar']=='Ordenar') {
+			$ordenar_subsubfamilia->ordenacion();
+		}
+		$ordenar_subsubfamilia->__destruct();		
+		
+	} else {
+		
+		$categorias->formulario_general();
+		
+	}
+	
+	echo '</div>';
+	
+} elseif($_GET['seccion']=='editar_productos' && $_SESSION['tipo_cliente']=='administrador') { 
+
+	echo '<div id="editar_productos">';
+	
+	$consulta_productos = New Mysql;	
+	$listado_prod = new Editar_productos($config);
+
+	if($_POST['idproducto'] && $_POST['accion']!='Ordenar') {
+		//sdm inicio
+
+		if($_POST['accion']=='poner_dto_pri') {
+			
+			$sql_poner_dto_pri = "INSERT INTO dtos_prioritarios SET idtipo_cliente={$_POST['idtipo_cliente']}, idproducto={$_POST['idproducto']}, dto_prioritario={$_POST['dto_prioritario']};";
+			$consulta_productos->resultado_consulta($sql_poner_dto_pri);
+			
+			$sql_producto = "
+				SELECT 
+					p.*,
+					f.idfamilia, 
+					s.idsubfamilia, 
+					ss.idsubsubfamilia, 
+					fa.idfabricante  
+				FROM 
+					productos p 
+					LEFT JOIN lineas l USING (idlinea) 
+					LEFT JOIN fabricantes fa USING (idfabricante)
+					LEFT JOIN subsubfamilias ss USING (idsubsubfamilia) 
+					LEFT JOIN subfamilias s USING (idsubfamilia) 
+					LEFT JOIN familias f USING (idfamilia) 
+				WHERE
+					p.idproducto = {$_POST['idproducto']}
+			;";		
+			$consulta_productos->ejecutar_consulta($sql_producto);
+			//necesario porque el objeto seleccion familias se alimenta de POST
+						
+			$_POST['idsubsubfamilia'] = $consulta_productos->registros[0]->idsubsubfamilia;
+			$_POST['idsubfamilia'] = $consulta_productos->registros[0]->idsubfamilia;
+			$_POST['idfamilia'] = $consulta_productos->registros[0]->idfamilia;
+			$_POST['idsubfamilia_ant'] = $consulta_productos->registros[0]->idsubfamilia;
+			$_POST['idfamilia_ant'] = $consulta_productos->registros[0]->idfamilia;
+			
+			$_POST['idfabricante_ant'] = $consulta_productos->registros[0]->idfabricante;
+			$_POST['idfabricante'] = $consulta_productos->registros[0]->idfabricante;
+			$_POST['idlinea'] = $consulta_productos->registros[0]->idlinea;
+
+			$listado_prod->editar_producto($consulta_productos->registros[0]);
+			
+		} elseif($_POST['accion']=='quitar_dto_pri') {
+			
+			$sql_quitar_dto_pri = "DELETE FROM dtos_prioritarios WHERE idtipo_cliente={$_POST['idtipo_cliente']} AND idproducto={$_POST['idproducto']};";
+			$consulta_productos->resultado_consulta($sql_quitar_dto_pri);
+			
+			$sql_producto = "
+				SELECT 
+					p.*,
+					f.idfamilia, 
+					s.idsubfamilia, 
+					ss.idsubsubfamilia, 
+					fa.idfabricante  
+				FROM 
+					productos p 
+					LEFT JOIN lineas l USING (idlinea) 
+					LEFT JOIN fabricantes fa USING (idfabricante)
+					LEFT JOIN subsubfamilias ss USING (idsubsubfamilia) 
+					LEFT JOIN subfamilias s USING (idsubfamilia) 
+					LEFT JOIN familias f USING (idfamilia) 
+				WHERE
+					p.idproducto = {$_POST['idproducto']}
+			;";		
+			$consulta_productos->ejecutar_consulta($sql_producto);
+			//necesario porque el objeto seleccion familias se alimenta de POST
+						
+			$_POST['idsubsubfamilia'] = $consulta_productos->registros[0]->idsubsubfamilia;
+			$_POST['idsubfamilia'] = $consulta_productos->registros[0]->idsubfamilia;
+			$_POST['idfamilia'] = $consulta_productos->registros[0]->idfamilia;
+			$_POST['idsubfamilia_ant'] = $consulta_productos->registros[0]->idsubfamilia;
+			$_POST['idfamilia_ant'] = $consulta_productos->registros[0]->idfamilia;
+			
+			$_POST['idfabricante_ant'] = $consulta_productos->registros[0]->idfabricante;
+			$_POST['idfabricante'] = $consulta_productos->registros[0]->idfabricante;
+			$_POST['idlinea'] = $consulta_productos->registros[0]->idlinea;
+
+			$listado_prod->editar_producto($consulta_productos->registros[0]);
+			
+		} elseif($_POST['accion']=='ordena_relacion') {
+			
+			echo '
+			<div id="dialog-message-ordenar" title="Ordena los productos" >';
+			
+			$ordenar_producto = new Ordenar('productos_relacionados','id_relacionado','nombre_producto', null, 'orden', "idproducto_ppal = {$_POST['idproducto']}");
+				if($_POST['ordenar']=='Ordenar') {
+					$ordenar_producto->ordenacion(false);
+					}
+			echo '</div>';
+			
+			//-------------------
+			//Pintar producto
+			$sql_producto = "
+				SELECT 
+					p.*,
+					f.idfamilia, 
+					s.idsubfamilia, 
+					ss.idsubsubfamilia, 
+					fa.idfabricante,
+					l.dto_linea   
+				FROM 
+					productos p 
+					LEFT JOIN lineas l USING (idlinea) 
+					LEFT JOIN fabricantes fa USING (idfabricante)
+					LEFT JOIN subsubfamilias ss USING (idsubsubfamilia) 
+					LEFT JOIN subfamilias s USING (idsubfamilia) 
+					LEFT JOIN familias f USING (idfamilia) 
+				WHERE
+					p.idproducto = {$_POST['idproducto']}
+			;";		
+			$consulta_productos->ejecutar_consulta($sql_producto);
+			//necesario porque el objeto seleccion familias se alimenta de POST
+						
+			$_POST['idsubsubfamilia'] = $consulta_productos->registros[0]->idsubsubfamilia;
+			$_POST['idsubfamilia'] = $consulta_productos->registros[0]->idsubfamilia;
+			$_POST['idfamilia'] = $consulta_productos->registros[0]->idfamilia;
+			$_POST['idsubfamilia_ant'] = $consulta_productos->registros[0]->idsubfamilia;
+			$_POST['idfamilia_ant'] = $consulta_productos->registros[0]->idfamilia;
+			
+			$_POST['idfabricante_ant'] = $consulta_productos->registros[0]->idfabricante;
+			$_POST['idfabricante'] = $consulta_productos->registros[0]->idfabricante;
+			$_POST['idlinea'] = $consulta_productos->registros[0]->idlinea;
+
+			$listado_prod->editar_producto($consulta_productos->registros[0]);
+			
+		} elseif($_POST['accion']=='nueva_relacion') {
+			//var_dump($_POST['idproducto_rel']);
+			//var_dump($_POST['idproducto_ppal']);
+			$nom_prod_rel=htmlentities($_POST['nombre_producto_rel'], ENT_QUOTES , "UTF-8");
+			$sql_poner_relacion = "INSERT INTO productos_relacionados (idproducto_ppal,idproducto_relacionado,nombre_producto)
+						values('{$_POST['idproducto_ppal']}', '{$_POST['idproducto_rel']}','$nom_prod_rel');";
+	
+			//var_dump($sql_elimina_relacionados);
+			$relacionados = new Mysql();
+			//$relacionados->ejecutar_consulta($sql_elimina_relacionados);
+			$relacionados->resultado_consulta($sql_poner_relacion);
+		
+			//-------------------
+			//Pintar producto
+			$sql_producto = "
+				SELECT 
+					p.*,
+					f.idfamilia, 
+					s.idsubfamilia, 
+					ss.idsubsubfamilia, 
+					fa.idfabricante,
+					l.dto_linea     
+				FROM 
+					productos p 
+					LEFT JOIN lineas l USING (idlinea) 
+					LEFT JOIN fabricantes fa USING (idfabricante)
+					LEFT JOIN subsubfamilias ss USING (idsubsubfamilia) 
+					LEFT JOIN subfamilias s USING (idsubfamilia) 
+					LEFT JOIN familias f USING (idfamilia) 
+				WHERE
+					p.idproducto = {$_POST['idproducto']}
+			;";		
+			$consulta_productos->ejecutar_consulta($sql_producto);
+			//necesario porque el objeto seleccion familias se alimenta de POST
+						
+			$_POST['idsubsubfamilia'] = $consulta_productos->registros[0]->idsubsubfamilia;
+			$_POST['idsubfamilia'] = $consulta_productos->registros[0]->idsubfamilia;
+			$_POST['idfamilia'] = $consulta_productos->registros[0]->idfamilia;
+			$_POST['idsubfamilia_ant'] = $consulta_productos->registros[0]->idsubfamilia;
+			$_POST['idfamilia_ant'] = $consulta_productos->registros[0]->idfamilia;
+			
+			$_POST['idfabricante_ant'] = $consulta_productos->registros[0]->idfabricante;
+			$_POST['idfabricante'] = $consulta_productos->registros[0]->idfabricante;
+			$_POST['idlinea'] = $consulta_productos->registros[0]->idlinea;
+
+			$listado_prod->editar_producto($consulta_productos->registros[0]);
+		
+		} elseif($_POST['accion']=='busca_relacion') {
+			//var_dump($_POST['id_diakros_bus']);
+			//var_dump($_POST['nombre_producto_bus']);
+			//var_dump($_POST['idproducto_ppal']);
+			
+			if($_POST['id_diakros_bus']) {
+				$sql_relacionados = "select * 
+				from productos 
+				where idproducto_diakros = '{$_POST['id_diakros_bus']}'
+				and web=1 
+				and idproducto not in 
+				 (
+				 select idproducto_relacionado 
+				 from productos_relacionados 
+				 where idproducto_ppal = '{$_POST['idproducto_ppal']}'
+				 ) ;";	
+			} else {
+				$sql_relacionados = "select * 
+				from productos 
+				where upper(producto) like upper('%{$_POST['nombre_producto_bus']}%') 
+				and web=1 
+				 and idproducto not in 
+				 (
+				 select idproducto_relacionado 
+				 from productos_relacionados 
+				 where idproducto_ppal = '{$_POST['idproducto_ppal']}'
+				 ) ;";
+				//limit 0,10;";
+			}
+
+			$relacionados = new Mysql();
+			$relacionados->ejecutar_consulta($sql_relacionados);
+	
+			echo '
+				<div id="dialog-message" title="Elementos encontrados" >';
+	
+			if (!$relacionados->registros) echo '<center><h4>Ningún artículo encontrado.</h4>'; 	
+			elseif( $relacionados->numero_registros > 10) echo '<center><h4>Demasiados artí­culos encontrados.</h4><center><h4>Especifique más la búqueda</h4>'; 	
+			else {
+				echo'	
+				<table>
+						<tr>
+							<th width="10">id
+							<th width="60">Nombre 
+							<th>Acción
+							';
+			
+	
+				foreach($relacionados->registros as $relacionado) {
+					echo '
+						<tr>
+								<form method="post" enctype="multipart/form-data" action="">
+												
+									<td><input type="text" name="id_diakros_rel" value="'.$relacionado->idproducto_diakros.'" size="10" maxlength="10" pattern="[a-zA-Z0-9_]+" />
+									<td><input type="text" name="nombre_producto_rel" value="'.$relacionado->producto_nombre.'" size="60" maxlength="200" required/>
+									<td><button name="accion" value="nueva_relacion"><img src="./img/agregar.png" height="16" /></button>	
+									<td><input type="hidden" name="idproducto_rel" value="' . $relacionado->idproducto . '" />
+									<td><input type="hidden" name="idproducto" value="' . $_POST['idproducto'] . '" />
+									<td><input type="hidden" name="idproducto_ppal" value="' . $_POST['idproducto'] . '" />
+									
+									</form>
+					';		
+				}
+			
+				echo '
+					<tr>
+						<td colspan="3">
+							';
+				echo '</table>';
+		
+			}//del else
+		
+			echo '	</div>	';
+		
+			//var_dump($relacionados);
+			
+			//-------------------
+			//Pintar producto
+			$sql_producto = "
+				SELECT 
+					p.*,
+					f.idfamilia, 
+					s.idsubfamilia, 
+					ss.idsubsubfamilia, 
+					fa.idfabricante,
+					l.dto_linea     
+				FROM 
+					productos p 
+					LEFT JOIN lineas l USING (idlinea) 
+					LEFT JOIN fabricantes fa USING (idfabricante)
+					LEFT JOIN subsubfamilias ss USING (idsubsubfamilia) 
+					LEFT JOIN subfamilias s USING (idsubfamilia) 
+					LEFT JOIN familias f USING (idfamilia) 
+				WHERE
+					p.idproducto = {$_POST['idproducto_ppal']}
+			;";		
+			$consulta_productos->ejecutar_consulta($sql_producto);
+			//necesario porque el objeto seleccion familias se alimenta de POST
+						
+			$_POST['idsubsubfamilia'] = $consulta_productos->registros[0]->idsubsubfamilia;
+			$_POST['idsubfamilia'] = $consulta_productos->registros[0]->idsubfamilia;
+			$_POST['idfamilia'] = $consulta_productos->registros[0]->idfamilia;
+			$_POST['idsubfamilia_ant'] = $consulta_productos->registros[0]->idsubfamilia;
+			$_POST['idfamilia_ant'] = $consulta_productos->registros[0]->idfamilia;
+			
+			$_POST['idfabricante_ant'] = $consulta_productos->registros[0]->idfabricante;
+			$_POST['idfabricante'] = $consulta_productos->registros[0]->idfabricante;
+			$_POST['idlinea'] = $consulta_productos->registros[0]->idlinea;
+
+			$listado_prod->editar_producto($consulta_productos->registros[0]);
+			
+			
+		} elseif($_POST['accion']=='quita_relacion') {
+			//var_dump($_POST['idproducto_rel']);
+			//var_dump($_POST['idproducto_ppal']);
+			
+			$sql_elimina_relacionados = "DELETE FROM productos_relacionados
+						WHERE idproducto_ppal='{$_POST['idproducto_ppal']}'
+						and idproducto_relacionado='{$_POST['idproducto_rel']}';";
+				//var_dump($sql_elimina_relacionados);
+			$relacionados = new Mysql();
+				//$relacionados->ejecutar_consulta($sql_elimina_relacionados);
+			$relacionados->resultado_consulta($sql_elimina_relacionados);
+			
+			$sql_producto = "
+				SELECT 
+					p.*,
+					f.idfamilia, 
+					s.idsubfamilia, 
+					ss.idsubsubfamilia, 
+					fa.idfabricante,
+					l.dto_linea     
+				FROM 
+					productos p 
+					LEFT JOIN lineas l USING (idlinea) 
+					LEFT JOIN fabricantes fa USING (idfabricante)
+					LEFT JOIN subsubfamilias ss USING (idsubsubfamilia) 
+					LEFT JOIN subfamilias s USING (idsubfamilia) 
+					LEFT JOIN familias f USING (idfamilia) 
+				WHERE
+					p.idproducto = {$_POST['idproducto_ppal']}
+			;";		
+			$consulta_productos->ejecutar_consulta($sql_producto);
+			//necesario porque el objeto seleccion familias se alimenta de POST
+						
+			$_POST['idsubsubfamilia'] = $consulta_productos->registros[0]->idsubsubfamilia;
+			$_POST['idsubfamilia'] = $consulta_productos->registros[0]->idsubfamilia;
+			$_POST['idfamilia'] = $consulta_productos->registros[0]->idfamilia;
+			$_POST['idsubfamilia_ant'] = $consulta_productos->registros[0]->idsubfamilia;
+			$_POST['idfamilia_ant'] = $consulta_productos->registros[0]->idfamilia;
+			
+			$_POST['idfabricante_ant'] = $consulta_productos->registros[0]->idfabricante;
+			$_POST['idfabricante'] = $consulta_productos->registros[0]->idfabricante;
+			$_POST['idlinea'] = $consulta_productos->registros[0]->idlinea;
+
+			$listado_prod->editar_producto($consulta_productos->registros[0]);
+
+		} elseif($_POST['accion']=='eliminar') {
+			
+			if(!$_POST['subaccion']) {
+				echo '
+					<div style="color: red; text-align: center">
+						<h3>¡ATENCIÓN! SE DISPONE A ELIMINAR "<u><b>'
+						.$_POST['producto_nombre']
+						.'"</b></u></h3>
+						<form method="post" enctype="multipart/form-data" action="">
+							<input type="hidden" name="accion" value="'. $_POST['accion'] .'">
+							<input type="hidden" name="idproducto" value="'. $_POST['idproducto'] .'">
+							<input type="submit" name="subaccion" value="Si">
+							<input type="submit" name="subaccion" value="No">
+						</form>
+					</div>
+				';
+			} elseif($_POST['subaccion']!='Si') {
+				echo '<center><h4>No se ha realizado ningún cambio.</h4><a href="'.$_SERVER['REQUEST_URI'].'">Volver</a></centrer>';
+			} else {
+				$sql_eliminar_producto = "UPDATE productos SET web = 0 WHERE idproducto = {$_POST['idproducto']};";
+				$consulta_productos->resultado_consulta($sql_eliminar_producto);
+				echo '<center><h4>Producto eliminado</h4><a href="'.$_SERVER['REQUEST_URI'].'">Volver</a></centrer>';
+			}
+
+		} elseif($_POST['accion'] == 'editar') {
+	
+			$sql_producto = "
+				SELECT 
+					p.*,
+					f.idfamilia, 
+					s.idsubfamilia, 
+					ss.idsubsubfamilia, 
+					fa.idfabricante  
+				FROM 
+					productos p 
+					LEFT JOIN lineas l USING (idlinea) 
+					LEFT JOIN fabricantes fa USING (idfabricante)
+					LEFT JOIN subsubfamilias ss USING (idsubsubfamilia) 
+					LEFT JOIN subfamilias s USING (idsubfamilia) 
+					LEFT JOIN familias f USING (idfamilia) 
+				WHERE
+					p.idproducto = {$_POST['idproducto']}
+			;";		
+			$consulta_productos->ejecutar_consulta($sql_producto);
+			//necesario porque el objeto seleccion familias se alimenta de POST
+						
+			$_POST['idsubsubfamilia'] = $consulta_productos->registros[0]->idsubsubfamilia;
+			$_POST['idsubfamilia'] = $consulta_productos->registros[0]->idsubfamilia;
+			$_POST['idfamilia'] = $consulta_productos->registros[0]->idfamilia;
+			$_POST['idsubfamilia_ant'] = $consulta_productos->registros[0]->idsubfamilia;
+			$_POST['idfamilia_ant'] = $consulta_productos->registros[0]->idfamilia;
+			
+			$_POST['idfabricante_ant'] = $consulta_productos->registros[0]->idfabricante;
+			$_POST['idfabricante'] = $consulta_productos->registros[0]->idfabricante;
+			$_POST['idlinea'] = $consulta_productos->registros[0]->idlinea;
+
+			$listado_prod->editar_producto($consulta_productos->registros[0]);
+			
+		} elseif($_POST['img1'] || $_POST['img2'] || $_POST['img3']) {
+			
+			for($i=1;$i<4;$i++) {
+				if($_POST['img'.$i]=='eliminar') {
+					$im = 'imagen'.$i;
+					$nom_imagen="SELECT $im as nombre_imagen FROM productos WHERE idproducto = {$_POST['idproducto']};";
+					$consulta_productos->ejecutar_consulta($nom_imagen);
+					echo $nombre_imagen = $consulta_productos->registros[0]->nombre_imagen;
+					$sql_eliminar_imagen = "UPDATE productos set $im = null WHERE idproducto = {$_POST['idproducto']};";
+					if($consulta_productos->resultado_consulta($sql_eliminar_imagen)) {
+						@unlink('./catalogo/miniaturas/'.$nombre_imagen);
+						@unlink('./catalogo/productos/'.$nombre_imagen);
+						echo '<center><h4>Producto modificado</h4><a href="'.$_SERVER['REQUEST_URI'].'">Volver</a></centrer>';
+					}
+				}	
+			}
+
+		} elseif($_POST['accion'] == 'terminar') {
+
+			//var_dump($_POST);
+			if(!$_POST['novedad']) $_POST['novedad'] = 0;
+			if(!$_POST['profesional']) $_POST['profesional'] = 0;
+			 
+			$campos_obligatorios = array(
+				'producto_nombre_web',
+				'idlinea',
+				'idsubsubfamilia'
+			);
+			$error = array();
+			foreach($campos_obligatorios as $campo) {
+				$var = new Validar_datos('no vacio', $_POST[$campo]);
+				if($var->error)  $error[$campo] = $var->error;
+				$var->__destruct();
+			}
+			//var_dump($error);
+			if(count($error) == 0) {
+
+				if($_FILES) {
+					foreach($_FILES as $nombre => $variable) {
+						if($_FILES[$nombre]['name']) {
+							$nombre_archivo = $_POST['idproducto'].'_'.$nombre;
+							$subir_imagen = new Subir_imagen(
+								$_FILES[$nombre], $config->conf['imagenes_prod_grande'], $nombre_archivo, $config->conf['alto_img_prod_grande'], $config->conf['ancho_img_prod_grande']	, true, 'png'
+							);
+							$subir_thumb = new Subir_imagen(
+								$_FILES[$nombre], $config->conf['imagenes_prod'], $nombre_archivo, $config->conf['alto_img_prod'], $config->conf['ancho_img_prod'], true, 'png'
+							);
+							$_POST[$nombre] = $_POST['idproducto'].'_'.$nombre.'.png';
+						}
+					} 
+				}
+				
+				if($subir_imagen->error) {
+					echo $subir_imagen->error_txt;
+				} 
+				
+				if($subir_thumb->error) {
+					echo $subir_thumb->error_txt;
+				} 
+					
+				if(!($subir_imagen->error || $subir_thumb->error)) {
+					//hay que subir las imagenes primero y dar el ok para que de los nombres
+					$campos_opcionales = array(
+						'profesional',
+						'novedad',
+						'descripcion', 
+						'imagen1', 
+						'imagen2', 
+						'imagen3',
+						'video'
+					);
+					$set = array();
+					foreach ($campos_opcionales as $campo) {
+						if(array_key_exists($campo, $_POST)) {
+							$set[] = $campo . " = '" . $_POST[$campo] . "' ";
+						}
+					}
+					$set_cadena = implode(',', $set);
+					$sql_editar_producto = "
+						UPDATE 
+							productos 
+						SET 
+							idlinea = '{$_POST['idlinea']}',  
+							idsubsubfamilia = '{$_POST['idsubsubfamilia']}', 
+							producto_nombre_web = '{$_POST['producto_nombre_web']}', 
+							dto_producto = '{$_POST['dto_producto']}', 
+							web = 1, 
+							$set_cadena  
+						WHERE 
+							idproducto = {$_POST['idproducto']}
+					;";
+					$consulta_productos->resultado_consulta($sql_editar_producto);
+					if(!$consulta_productos->error) {
+						echo '<center><h4>Producto modificado</h4><a href="'.$_SERVER['REQUEST_URI'].'">Volver</a></centrer>';
+					}
+				}
+				
+			} else {	
+				$producto = (object) $_POST;
+				$listado_prod->editar_producto($producto,$error);
+			}
+			
+		} else {
+			
+			$producto = (object) $_POST;
+			$listado_prod->editar_producto($producto);
+		}			
+
+	} else {		
+		//hay que poner las opciones de localización de productos
+		if($_GET['subseccion']=='Pendientes' || $_GET['subseccion']=='Eliminados') {
+			if($_GET['subseccion']=='Eliminados') {
+				$sql_listar_productos = "SELECT * FROM productos WHERE eliminado = 0 AND web = 0 ORDER BY idproducto_diakros LIMIT 0,6000;";
+			} else {
+				$sql_listar_productos = "SELECT * FROM productos WHERE eliminado = 0 And (web = 1 or web is null) AND idsubsubfamilia is NULL ORDER BY idproducto_diakros LIMIT 0,10000;";
+			}
+			$consulta_productos->ejecutar_consulta($sql_listar_productos);
+			if($consulta_productos->numero_registros>0) {
+				$consulta_productos_pag = new Paginador($consulta_productos,25);
+				if(!$consulta_productos_pag->error) {
+					//var_dump($consulta_productos_pag->resultado[$_GET['index']]->registros);
+					$listado_prod->listar_productos($consulta_productos_pag->resultado[$_GET['index']]->registros);
+				}
+				$consulta_productos_pag->poner_indices();
+				//fin de la modificación
+				//$listado_prod->listar_productos($consulta_productos->registros);
+			} else {
+				echo 'No hay resultados';
+			}
+		} elseif($_GET['subseccion']=='Sincronizacion') {
+			
+			if($_POST['accion']) {		
+				
+				echo "<br>Sincronizando... Por favor espere...<br>";
+				
+				if($_POST['idinicial']) {
+					$sync = new Sincronizacion_productos($_POST['idinicial'],$_POST['idfinal']);
+				} elseif($_POST['accion']=='Sincronizacion desde ultimo Id') {
+					$ultimo_id=new Mysql;
+					$sql_ultimo_id = "SELECT MAX(idproducto_diakros) AS inicio FROM productos;";
+					$ultimo_id->ejecutar_consulta($sql_ultimo_id);
+					$inicio = $ultimo_id->registros[0]->inicio;
+					$ultimo_id->__destruct();
+					$sync = new Sincronizacion_productos($inicio);
+				} elseif($_POST['accion']=='Sincronizacion Completa') {
+					$sync = new Sincronizacion_productos();
+				} else {
+					echo 'No se puede realizar la sincronizacion propuesta.';
+				}
+				
+				echo "finalizado";
+				
+			} else {
+				echo '
+					<form method="post" action="" enctype="multipart/form-data">
+						Id Inicial: <input type="text" name="idinicial" value="'.$_POST['idinicial'].'" size="5" maxlength="5" /><br>
+						Id Final: <input type="text" name="idfinal" value="'.$_POST['idfinal'].'" size="5" maxlength="5" /><br>
+						<input type="submit" name="accion" value="Sincronizacion" /><br>
+						<input type="submit" name="accion" value="Sincronizacion desde ultimo Id" /><br>
+						Una sincronización completa y puede llevar mucho tiempo.¿Esta seguro?<br>
+						<input type="submit" name="accion" value="Sincronizacion Completa" />
+					</form>
+				';
+			}
+				
+		} elseif($_GET['subseccion']=='Buscar') {
+			//var_dump($_post);
+			
+			$buscar_prod = new Buscador_general();
+			
+			if($_POST['buscar']=='Buscar') {
+				$buscar_prod->resultados();
+				if(!$buscar_prod->error) {
+					if($buscar_prod->numero_registros > 0) {
+						$_SESSION['sql_busqueda_admin']=$buscar_prod->sql;
+						$buscar_prod_pag = new Paginador($buscar_prod->registros,25);
+						if(!$buscar_prod_pag->error) {
+							$listado_prod->listar_productos($buscar_prod_pag->resultado[$_GET['index']]);
+						}
+						$buscar_prod_pag->poner_indices();
+						
+					} else {
+						echo 'No hay resultados';
+					}
+				} else {
+					echo 'No se puede ejecutar la busqueda con los criterios seleccionados.';
+				}
+			} elseif($_SESSION['sql_busqueda_admin'] && $_GET['index']) {
+				$buscar = new Mysql;
+				$buscar->ejecutar_consulta($_SESSION['sql_busqueda_admin']);
+				$buscar_pag = new Paginador($buscar->registros,25);
+				if(!$buscar_pag->error) {
+					$listado_prod->listar_productos($buscar_pag->resultado[$_GET['index']]);
+				}
+				$buscar_pag->poner_indices();
+			} else {
+				$buscar_prod->formulario_busqueda();
+			}
+			
+			$buscar_prod->__destruct();
+
+		} elseif($_GET['subseccion']=='Ordenar') {
+			
+			if($_POST['idsubsubfamilia'] && $_POST['accion']=='Ordenar') {
+				
+				$ordenar_producto = new Ordenar('productos','idproducto','producto', 'eliminado', 'orden', "idsubsubfamilia = {$_POST['idsubsubfamilia']} AND web=1");
+				if($_POST['ordenar']=='Ordenar') {
+					$ordenar_producto->ordenacion();
+				}
+				$ordenar_producto->__destruct();	
+				
+			} else {
+			
+				echo '
+					<form method="post" enctype="multipart/form-data" action="">
+				';
+				$categoria_ordenar_producto = new Seleccion_familias();
+				echo '		
+						<input type="submit" name="accion" value="Ordenar" />
+					</form>
+				';
+								
+			}
+			
+		} else {
+			/***************************************************************
+			/realizamos la eleccion de producto, no podemos sacar todos,
+			/colocamos el filtro de donde sacamos los listados
+			***************************************************************/			
+			echo '
+				<form method="get" enctype="multipart/form-data" action="">
+					<input type="hidden" name="seccion" value="editar_productos" />
+					<input type="submit" name="subseccion" value="Sincronizacion" />
+					<input type="submit" name="subseccion" value="Buscar" />
+					<input type="submit" name="subseccion" value="Pendientes" />
+					<input type="submit" name="subseccion" value="Ordenar" />
+					<input type="submit" name="subseccion" value="Eliminados" />
+				</form>
+			';
+			
+		}
+		
+	}
+	
+	echo '</div>';
+	
+} elseif(
+	$_GET['seccion']=='clientes' || 
+	($_POST['accion']=='datos' && $_SESSION['idcliente']) || 	
+	$_POST['accion']=='Nuevo Registro' || 	
+	$_POST['accion']=='Registrarse' ||
+	(($_POST['accion']=='Modificar' || $_POST['accion']=='Baja') && $_POST['idcliente'])
+	) {
+	
+	$cliente = New Editar_clientes;
+	echo '<div id="editar_clientes">';	
+	
+	if($_SESSION['tipo_cliente']=='administrador') {
+		
+		if($_POST['accion']=='Modificar' || $_POST['accion']=='Registrarse') {
+			
+			$cliente->introducir_datos($_POST);
+			
+		} elseif($_POST['accion']=='Eliminar') {
+			
+			$cliente->eliminar_cliente($_POST['idcliente']);
+
+		} elseif($_GET['subseccion']=='Nuevo') {
+			
+			$cliente->formulario($_POST);
+			
+		} elseif($_GET['subseccion']=='Buscar') {
+			
+			if($_POST['accion']=='Buscar') $cliente->buscar($_POST);
+			elseif($_POST['accion']=='editar') $cliente->buscar_cliente_id($_POST);
+			elseif($_POST['accion']=='eliminar') $cliente->buscar_cliente_id($_POST,true);
+			else $cliente->formulario_busqueda();
+			
+		} elseif($_GET['subseccion']=='Pendientes') {
+			
+			if($_POST['accion']=='editar') $cliente->buscar_cliente_id($_POST);
+			elseif($_POST['accion']=='eliminar') $cliente->buscar_cliente_id($_POST,true);
+			else $cliente->pendientes();
+
+		} else { 		
+	
+			$cliente->formulario_administrador();
+
+		}
+
+	} elseif($_POST['accion']=='datos' && $_SESSION['idcliente']) {
+
+		//editamos los datos de este cliente
+		$cliente->buscar_cliente_id($_SESSION);	
+		
+	} else {
+
+		
+		if($_POST['accion']=='Registrarse') {
+			
+			$cliente->introducir_datos($_POST);
+
+			if(!$cliente->error) {
+				$mensaje_html = '
+					<p>Para activar su cuenta de correo electrónico ha de hacer clic en el siguiente enlace:</p>
+					<p align="center"><a href="http://www.dizma.es/desbloqueo.php?usuario='.$_POST['usuario'].'&desbloqueo='.$_POST['desbloqueo'].'">Activar mi cuenta en DIZMA</a></p>
+					<p>Desde el equipo de Dizma, le agradecemos su confianza en nosotros.</p>
+				';
+				$mail_registro = new Html_mail($mensaje_html, 'E-mail de confirmación de cuenta en dizma.es', true, $_POST['usuario']);
+				if($mail_registro->error) {
+					echo $mail_registro->error;
+					$mail_no_registro_admin = new Html_mail("No se ha podido enciar el correo de registro a: {$_POST['usuario']}", 'E-mail de error de registro de cuenta en dizma.es', false, false, $_POST['usuario']);
+				} else {
+					echo '<center><h4>Se le ha enviado un e-mail para que active su cuenta, compruebe su cuenta de correo.</h4></center>';
+					$mail_registro_admin = new Html_mail("Se ha registrado un nuevo usuario: {$_POST['usuario']}", 'E-mail de registro de cuenta en dizma.es', false, false, $_POST['usuario']);
+				}
+			}
+			 
+		} elseif($_POST['accion']=='Modificar') {
+			
+			$cliente->introducir_datos($_POST);
+			
+		} elseif($_POST['accion']=='Baja') {
+
+			if($_POST['confirmacion']=='1') {
+				$cliente->eliminar_cliente($_SESSION['idcliente']);
+				session_destroy();
+			} else {
+				echo '
+					<form action="" method="post" enctype="multipart/form-data">
+					<p align="center">¿Esta seguro de querer darse de baja en nuestro servicio?<br>	
+						<input type="hidden" name="confirmacion" value="1" />
+						<input type="hidden" name="idcliente" value="'.$_SESSION['idcliente'].'">
+						<input type="submit" name="accion" value="Baja" class="boton" />
+					</p>
+					</form>
+				';
+			}
+
+		} else {
+			
+			$cliente->formulario($_POST);
+			
+		}		
+		
+	}
+	echo '</div>';
+	
+} elseif($_GET['seccion']=='grupos' && $_SESSION['tipo_cliente']=='administrador') { 
+
+	echo '<div id="editar_productos">';
+	
+	$grupos = new Editar_tipos_clientes($config);
+	
+	if($_POST['accion']=='Eliminar') {
+		
+		$grupos->eliminar($_POST);
+		
+	} elseif($_POST['accion']) {
+
+		$grupos->editar($_POST);
+
+	} else {
+		
+		$grupos->formulario_general();
+	}
+	
+	echo '</div>';
+	
+} elseif($_GET['seccion']=='tarifas' && $_SESSION['tipo_cliente']=='administrador') { 
+
+	echo '<div id="editar_productos">';
+	
+	$tarifas = new Editar_tarifas();
+	
+	if($_POST['accion']=='Eliminar') {
+		
+		$tarifas->eliminar($_POST);
+	
+	} elseif($_POST['accion']=='general') {
+		
+		$tarifas->editar_tarifa_general($_POST['idtarifa']);
+		
+	} elseif($_POST['accion']) {
+
+		$tarifas->editar($_POST);
+
+	} else {
+		
+		$tarifas->formulario_general();
+	}
+	
+	echo '</div>';
+	
+} elseif($_GET['seccion']=='descuentos' && $_SESSION['tipo_cliente']=='administrador') { 
+
+	echo '<div id="editar_productos">';
+	
+	$descuentos = new Editar_descuentos($config);
+	
+	if($_POST['accion']=='Eliminar') {
+		
+		$descuentos->eliminar($_POST);
+		
+	} elseif($_POST['accion']) {
+
+		$descuentos->editar($_POST);
+
+	} else {
+		
+		$descuentos->formulario_general();
+	}
+	
+	echo '</div>';
+	
+} elseif($_GET['seccion']=='gastos_envio' && $_SESSION['tipo_cliente']=='administrador') { 
+	
+	echo '<div id="editar_productos">';
+	
+	$envios = new Editar_envios();
+	
+	if($_POST['accion']=='Eliminar') {
+		
+		$envios->eliminar($_POST);
+		
+	} elseif($_POST['accion']) {
+
+		$envios->editar($_POST);
+
+	} else {
+		
+		$envios->formulario_general();
+	}
+	
+	echo '</div>';
+	
+} elseif($_GET['seccion']=='otros' && $_SESSION['tipo_cliente']=='administrador') { 
+	
+	echo '<div id="editar_productos">';
+	
+	$pasafotos = new Editar_pasafoto();
+	
+	if($_POST['accion']=='Eliminar') {
+		
+		$pasafotos->eliminar($_POST);
+		
+	} elseif($_POST['accion']) {
+
+		$pasafotos->subir_imagenes($_POST);
+
+	} else {
+		
+		$pasafotos->listado_fotos();
+	}
+	
+	echo '</div>';
+	
+} elseif($_GET['seccion']=='buscar' && !$_GET['producto']) {
+	
+	//echo '<div id="editar_productos">';
+	
+	if($_POST['buscar_txt']) unset($_SESSION['sql_busqueda']);
+
+	$buscar_prod = new Buscador_general();
+			
+	if(strlen($_POST['buscar_txt'])>2) {
+		$buscar_prod->resultados();
+		if(!$buscar_prod->error) {
+			//unset($_GET['seccion']);
+			$_SESSION['sql_busqueda'] = $buscar_prod->sql;
+			Poner_productos::productos($buscar_prod->sql,$config);
+		} else {
+			echo '<div id="editar_productos">No se han encontrado resultados con los criterios seleccionados.</div>';
+		}
+	} elseif($_SESSION['sql_busqueda']) {
+		 Poner_productos::productos($_SESSION['sql_busqueda'],$config);
+	} else {
+		echo '<div id="editar_productos">Búsqueda sin texto a buscar o con pocos caracteres.</div>';
+	}
+	
+	$buscar_prod->__destruct();
+	
+} else {
+	
+	/******************************************************************
+	/ hasta que no existan las ofertas vamos a poner de forma temp que
+	/ aparezcan las familias. He de midificar la edicion de las familias
+	/ para que tengan imagen
+	*******************************************************************/
+	
+	if($_GET['producto']) {
+
+		$producto=new Mysql;
+		$sql_producto="
+			SELECT 
+				l.linea_menu,
+				l.dto_linea,  
+				f.fabricante_menu, 
+				p.* 
+			FROM 
+				lineas l, 
+				fabricantes f, 
+				productos p 
+			WHERE 
+				l.idlinea = p.idlinea AND 
+				l.idfabricante = f.idfabricante AND 
+				p.producto='". $_GET['producto'] ."' AND 
+				p.eliminado=0 AND
+				p.web = 1 
+				$where_prod_prof
+			LIMIT 0,1;
+		";
+		$producto->ejecutar_consulta($sql_producto);
+		
+		$mostrar_producto=new Producto($config,$producto);
+		$mostrar_producto->poner_producto();
+		
+	} elseif($_GET['subsubfamilia']) {
+		
+		$sql_productos="
+			SELECT 
+				l.linea_menu,
+				l.dto_linea,  
+				f.fabricante_menu, 
+				p.* 
+			FROM  
+				lineas l, 
+				fabricantes f, 
+				subsubfamilias ss, 
+				subfamilias sf, 
+				familias ff, 
+				productos p 
+			WHERE 
+				l.idlinea = p.idlinea AND 
+				l.idfabricante = f.idfabricante AND 
+				ss.subsubfamilia='{$_GET['subsubfamilia']}' AND 
+				sf.subfamilia='{$_GET['subfamilia']}' AND 
+				ff.familia='{$_GET['familia']}' AND  
+				p.idsubsubfamilia=ss.idsubsubfamilia AND 
+				ss.idsubfamilia=sf.idsubfamilia AND 
+				sf.idfamilia=ff.idfamilia AND 
+				p.eliminado=0 AND 
+				p.web = 1 
+				$where_prod_prof 
+			ORDER BY
+				p.orden, 
+				p.producto 
+			LIMIT 0,500;
+		";
+		
+		Poner_productos::productos($sql_productos,$config);
+		
+	} elseif($_GET['subfamilia']) {
+	
+		$subsubfam=new Mysql;
+		$sql_subsubfam = "
+			SELECT 
+				ss.* 
+			FROM 
+				familias ff, 
+				subfamilias s, 
+				subsubfamilias ss  
+			WHERE 
+				s.idsubfamilia=ss.idsubfamilia AND 
+				s.subfamilia='{$_GET['subfamilia']}' AND 
+				s.idfamilia=ff.idfamilia AND 
+				ff.familia='{$_GET['familia']}' AND 
+				ss.eliminado=0 
+			ORDER BY
+				ss.orden, 
+				ss.subsubfamilia 
+			LIMIT 0,100;
+		";	
+		$subsubfam->ejecutar_consulta($sql_subsubfam);
+		
+		if($subsubfam->registros[0]->subsubfamilia=='0') {
+
+			$sql_productos="
+				SELECT 
+					l.linea_menu,
+					l.dto_linea,  
+					f.fabricante_menu, 
+					p.* 
+				FROM  
+					lineas l, 
+					fabricantes f, 
+					productos p 
+				WHERE 
+					l.idlinea = p.idlinea AND 
+					l.idfabricante = f.idfabricante AND 
+					p.idsubsubfamilia='{$subsubfam->registros[0]->idsubsubfamilia}' AND 
+					p.eliminado=0 AND
+					p.web = 1 
+					$where_prod_prof 
+				ORDER BY
+					p.orden, 
+					p.producto 
+				LIMIT 0,500;
+			";
+			
+			Poner_productos::productos($sql_productos,$config);
+			
+		} elseif(!$subsubfam->registros[0]->subsubfamilia) {
+			
+			echo '<h1 align="center">Sección en Obras.Disculpen las molestias.</h1>';
+			
+		} else {
+			
+			Poner_productos::menus($subsubfam,$config);	
+			
+		}
+		
+	} elseif($_GET['familia']) {
+		
+		$subfam=new Mysql;
+		$sql_subfamilia="
+			SELECT 
+				s.* 
+			FROM 
+				subfamilias s, 
+				familias f 
+			WHERE 
+				f.idfamilia=s.idfamilia AND 
+				f.familia='{$_GET['familia']}' AND 
+				s.eliminado=0 
+			ORDER BY
+				s.orden, 
+				s.subfamilia 
+			LIMIT 0,100;
+		";
+		$subfam->ejecutar_consulta($sql_subfamilia);
+		
+		if($subfam->registros[0]->subfamilia=='0') {
+	
+			$sql_productos="
+				SELECT 
+					l.linea_menu,
+					l.dto_linea,  
+					f.fabricante_menu, 
+					p.* 
+				FROM  
+					lineas l, 
+					fabricantes f, 
+					subsubfamilias ss, 
+					productos p 
+				WHERE 
+					l.idlinea = p.idlinea AND 
+					l.idfabricante = f.idfabricante AND  
+					p.idsubsubfamilia=ss.idsubsubfamilia AND 
+					ss.idsubfamilia ='{$subfam->registros[0]->idsubfamilia}' AND 
+					p.eliminado=0 AND
+					p.web = 1 
+					$where_prod_prof 
+				ORDER BY
+					p.orden, 
+					p.producto 
+				LIMIT 0,500;
+			";
+			
+			Poner_productos::productos($sql_productos,$config);
+					
+		} elseif(!$subfam->registros[0]->subfamilia) {
+			
+			echo '<h1 align="center">SecciÃ³n en Obras.Disculpen las molestias.</h1>';
+			
+		} else {
+			
+			Poner_productos::menus($subfam,$config);;	
+			
+		}
+		
+	} elseif($_GET['familia_web']) {
+		
+		if($_GET['familia_web']=='novedades') {
+			$sql_productos="
+				SELECT 
+					l.linea_menu,
+					l.dto_linea,  
+					f.fabricante_menu, 
+					p.* 
+				FROM  
+					lineas l, 
+					fabricantes f, 
+					productos p 
+				WHERE 
+					l.idlinea = p.idlinea AND 
+					l.idfabricante = f.idfabricante AND 
+					p.novedad = 1 AND 
+					p.eliminado = 0 AND 
+					p.web = 1 
+					$where_prod_prof 
+				ORDER BY
+					p.orden, 
+					p.producto 
+				LIMIT 0,500;
+			";
+		} else {
+			$sql_productos="
+				SELECT 
+					l.linea_menu,
+					l.dto_linea,  
+					f.fabricante_menu, 
+					p.* 
+				FROM  
+					lineas l, 
+					fabricantes f, 
+					productos p, 
+					productos_familias_web pf, 
+					familias_web fw 
+				WHERE 
+					l.idlinea = p.idlinea AND 
+					l.idfabricante = f.idfabricante AND 
+					fw.familia_web = '{$_GET['familia_web']}' AND 
+					pf.idfamilia_web = fw.idfamilia_web AND 
+					pf.idproducto = p.idproducto AND 
+					p.eliminado = 0 AND 
+					p.web = 1 
+					$where_prod_prof 
+				ORDER BY
+					p.orden, 
+					p.producto 
+				LIMIT 0,500;
+			";
+		}
+		
+		Poner_productos::productos($sql_productos,$config);
+		
+	} elseif($_GET['linea']) {
+
+		$sql_productos="
+			SELECT 
+				ss.dto_linea, 
+				p.* 
+			FROM  
+				lineas ss, 
+				productos p 
+			WHERE 
+				ss.linea='{$_GET['linea']}' AND 
+				p.idlinea=ss.idlinea AND 
+				p.eliminado=0 AND 
+				p.web = 1 
+				$where_prod_prof 
+			ORDER BY 
+				p.producto 
+			LIMIT 0,500;
+		";
+		
+		Poner_productos::productos($sql_productos,$config);
+		
+	} elseif($_GET['fabricante']) {
+		
+		$sql_lineas = "
+			SELECT 
+				l.* 
+			FROM 
+				lineas l, 
+				fabricantes f 
+			WHERE 
+				f.fabricante='{$_GET['fabricante']}' AND 
+				l.idfabricante=f.idfabricante AND
+				l.eliminado=0 
+			ORDER BY 
+				l.orden, 
+				l.linea 
+			LIMIT 
+				0,100;
+		";
+		$lineas = new Mysql();
+		$lineas->ejecutar_consulta($sql_lineas);
+		
+		if($lineas->registros[0]->linea=='0') {
+
+			$sql_productos="
+				SELECT 
+					l.dto_linea,
+					p.* 
+				FROM 
+					lineas l,  
+					productos p 
+				WHERE 
+					p.idlinea = l.idlinea AND 
+					l.idlinea ='{$lineas->registros[0]->idlinea}' AND 
+					p.eliminado=0 AND
+					p.web = 1 
+					$where_prod_prof 
+				ORDER BY 
+					p.producto 
+				LIMIT 0,500;
+			";
+			
+			Poner_productos::productos($sql_productos,$config);
+					
+		} elseif(!$lineas->registros[0]->linea) {
+			
+			echo '<h1 align="center">Sección en Obras.Disculpen las molestias.</h1>';
+			
+		} else {
+			
+			Poner_productos::menus($lineas,$config);
+			
+		}
+
+		
+	} else {
+		
+		$portada=new Mysql;
+		$sql_portada = "SELECT idfamilia_web FROM familias_web WHERE portada = 1 LIMIT 0,1;";
+		$portada->ejecutar_consulta($sql_portada);
+		if($portada->numero_registros > 0) {
+			$sql_productos="
+				SELECT 
+					l.dto_linea, 
+					p.* 
+				FROM  
+					lineas l, 
+					productos p, 
+					productos_familias_web w 
+				WHERE 
+					p.idlinea = l.idlinea AND 
+					w.idfamilia_web = {$portada->registros[0]->idfamilia_web} AND 
+					p.idproducto = w.idproducto AND 
+					p.eliminado = 0 AND 
+					p.web = 1 
+					$where_prod_prof 
+				ORDER BY
+					p.orden, 
+					p.producto 
+				LIMIT 0,500;
+			";
+		} else {
+			$sql_productos="
+				SELECT 
+					l.dto_linea, 
+					p.* 
+				FROM  
+					lineas l, 
+					productos p 
+				WHERE 
+					p.idlinea = l.idlinea AND 
+					p.novedad = 1 AND 
+					p.eliminado = 0 AND 
+					p.web = 1 
+					$where_prod_prof 
+				ORDER BY
+					p.orden, 
+					p.producto 
+				LIMIT 0,500;
+			";
+		}
+		$portada->__destruct();
+		
+		Poner_productos::productos($sql_productos,$config);
+			
+	}
+	
+}

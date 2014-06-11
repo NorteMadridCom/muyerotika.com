@@ -1,0 +1,49 @@
+footer{
+	background-image: url("../img/pie.png");
+	background-repeat: repeat-x;
+	width: 100%;
+	background-color: #333;
+	padding-top: 50px;
+	padding-bottom: 20px;
+	margin-bottom: -10px;
+}
+
+#columnas_pie{
+	width: 200px;
+	float: left;
+	margin: 0px 10px 50px 10px;
+}
+
+h3.pie{
+	font-family: 'erotika';
+	text-align: center;
+	color: #fff;
+	font-weight: normal;
+	font-size: 22px;
+}
+
+p.pie{
+	font-family: 'erotika';
+	font-size: 18px;
+	clear: both;
+	color: #ccc;
+	margin-left: 10px;
+}
+
+ul.pie{
+	color: #c9424f;
+	list-style: square;
+}
+
+li.pie{
+	font-family: 'erotika';
+	font-size: 18px;
+}
+
+a.pie{
+	color: #ccc;
+}
+a.pie:hover{
+	color: #fff;
+}
+

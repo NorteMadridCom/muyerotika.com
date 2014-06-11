@@ -1,0 +1,36 @@
+body{
+	margin: 0px;
+	background-color: #fff;
+}
+
+#centrador_web{
+	margin: auto;
+    width: 1000px;
+}
+
+@font-face {
+	font-family: 'erotika';
+	src: url('../fuente/erotika.eot');
+	src: url('../fuente/erotika.woff') format('woff'), url('../fuente/erotika.ttf') format('truetype'), url('../fuente/erotika.svg') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+p{
+	color: #66392A;
+	font-family: 'arial';
+	font-size: 12px;
+}
+
+a{
+	text-decoration: none;
+}
+h1{
+	font-family: 'erotika';
+	font-weight: normal;
+	font-size: 30px;
+	color: #000;
+	text-align: center;
+	margin-top: 80px;
+	margin-left: -20px;
+}

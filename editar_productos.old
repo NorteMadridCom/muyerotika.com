@@ -1,0 +1,351 @@
+<?php
+
+class Editar_productos
+{
+	/*
+	 * requiere el paginador.php
+	 */
+	private $_config;
+	
+	public function __construct($config) 
+	{
+		$this->_config=$config->conf;
+	}
+	
+	public function listar_productos_paginados($sql_listar_productos)
+	{
+		//require 'includes/class.paginador.php';
+		$sql_listar_productos;
+		$consulta_productos = New Mysql;
+		$consulta_productos->ejecutar_consulta($sql_listar_productos);
+		if($consulta_productos->numero_registros>0) {
+			$consulta_productos_pag = new Paginador($consulta_productos,25);
+			//var_dump($consulta_productos_pag);
+			if(!$consulta_productos_pag->error) {
+				//var_dump($consulta_productos_pag->resultado[$_GET['index']]->registros);
+				$this->listar_productos($consulta_productos_pag->resultado[$_GET['index']]->registros);
+			}
+			$consulta_productos_pag->poner_indices();
+		} else echo 'No hay resultados';
+	}
+	
+	public function buscar_producto($idproducto)
+	{
+		$prod = new Mysql;
+		$sql_producto = "
+			SELECT 
+				p.*,
+				f.idfamilia, 
+				s.idsubfamilia, 
+				ss.idsubsubfamilia, 
+				fa.idfabricante,
+				l.dto_linea     
+			FROM 
+				productos p 
+				LEFT JOIN lineas l USING (idlinea) 
+				LEFT JOIN fabricantes fa USING (idfabricante)
+				LEFT JOIN subsubfamilias ss USING (idsubsubfamilia) 
+				LEFT JOIN subfamilias s USING (idsubfamilia) 
+				LEFT JOIN familias f USING (idfamilia) 
+			WHERE
+				p.idproducto = $idproducto
+		;";		
+		$prod->ejecutar_consulta($sql_producto);
+		//necesario porque el objeto seleccion familias se alimenta de POST
+
+		$_POST['idsubsubfamilia'] = $prod->registros[0]->idsubsubfamilia;
+		$_POST['idsubfamilia'] = $prod->registros[0]->idsubfamilia;
+		$_POST['idfamilia'] = $prod->registros[0]->idfamilia;
+		$_POST['idsubfamilia_ant'] = $prod->registros[0]->idsubfamilia;
+		$_POST['idfamilia_ant'] = $prod->registros[0]->idfamilia;
+		
+		$_POST['idfabricante_ant'] = $prod->registros[0]->idfabricante;
+		$_POST['idfabricante'] = $prod->registros[0]->idfabricante;
+		$_POST['idlinea'] = $prod->registros[0]->idlinea;
+		
+		$this->editar_producto($prod->registros[0]);
+		
+		$prod->__destruct();
+	}
+	
+	public function listar_productos($registros) 
+	{
+		//$sql="SELECT * FROM productos WHERE eliminado = 0 AND web = NULL;";
+		//depende de lo que metamos en la sql, podemos sacar mas o menos datos
+		//si no marca las opciones segiran saliendo, es decir, un si/no y si lo edita automaticamente pasa a ser un si
+		//deberiamos establecer un filtro, pero en un principio lo dejo asi
+		//el filtro es ver productos que esten entre fechas, sin marca, sin familia, sin web, eliminados... ect.
+		//nos traemos el listado
+		//falta poner la tabla, es decir, las cabeceras
+		
+		//var_dump($registros);
+		
+		echo '<table>
+					<tr>
+						<th>Id
+						<th>Nombre del Producto
+						<th>Fabricante
+						<th>Categoria
+						<th>Estado
+						<th>Acción';
+		
+		foreach ($registros as $producto) {
+			if($producto->subsubfamilia) {
+				$categoria = $producto->idsubsubfamilia;
+			} elseif($producto->subfamilia) {
+				$categoria = $producto->idsubfamilia;
+			} elseif($producto->familia) {
+				$categoria = $producto->idfamilia;
+			} else {
+				$categoria = "";
+			}
+			if($producto->linea) {
+				$marca = $producto->idlinea;
+			} elseif($producto->fabricante) {
+				$marca = $producto->fabricante;
+			} else {
+				$marca = "";
+			}
+			$estado = 'Activo';
+			if($producto->web == '0') $estado='Eliminado';
+			else if($producto->idsubsubfamilia==NULL) $estado='Pendiente'; 
+			
+			echo '
+				<tr>
+				<form action="" method="post" enctype="multipart/form-data">
+					<input type="hidden" name="idproducto" value="'.$producto->idproducto.'" />
+					<input type="hidden" name="producto_nombre" value="'.$producto->producto_nombre.'" />'
+					.'<td>'.$producto->idproducto_diakros
+					.'<td>'.$producto->producto_nombre
+					.'<td>'.$marca
+					.'<td>'.$categoria	
+					.'<td>'.$estado
+					.'<td><button name="accion" value="eliminar"><img src="./img/eliminar.png" height="14" /></button>
+					<button name="accion" value="editar"><img src="./img/editar.png" height="14" /></button>
+				</form>
+			';//editar ha de poner web = 1 y eliminar ha de poner web = 0, si es el caso
+		}
+		echo '</table>';
+	}
+	
+	public function editar_producto($producto=false,$marcar_error = array()) 
+	{
+
+		$color_error = ' bgcolor="red" ';
+		$colorear = array();
+		foreach($marcar_error as $poner_rojo => $bool) {
+			$colorear[$poner_rojo] = $color_error;
+		}
+		
+		if(!$producto->producto_nombre_web) $producto->producto_nombre_web = $producto->producto_nombre;
+
+		unset($checked_novedad);
+		if($producto->novedad == '1') $checked_novedad = 'checked';
+		
+		unset($checked_prof);
+		if($producto->profesional == '1') $checked_prof = 'checked';
+		
+		$estado = 'Activo';
+		if($producto->web == '0') $estado='Eliminado';
+		else if($producto->idsubsubfamilia==NULL) $estado='Pendiente'; 	
+
+		echo '
+			<form action="" method="POST" enctype="multipart/form-data">
+				<input type="hidden" name="idproducto" value="'.$producto->idproducto.'">
+				<input type="hidden" name="producto_nombre" value="'.$producto->producto_nombre.'">
+				<table>
+					<tr>
+						<th colspan="3">'.$producto->producto_nombre.'
+					<tr>
+						<td colspan="3">
+							Nombre:<br><input size="74" type="text" name="producto_nombre_web" maxlength="255" value="'. $producto->producto_nombre_web .'" required autofocus>
+					<tr>
+						<td ' . $colorear['idfabricante'] . '> Fabricante: <td ' . $colorear['idlinea'] . '> Linea: 
+		';
+
+		unset($checked_novedad);
+		if($producto->novedad == '1') $checked_novedad = 'checked';		
+		echo '			<td><label>Novedad: </label><input type="checkbox" name="novedad" value="1" '.$checked_novedad.' />';
+		
+		echo '<tr>';
+		$fabricante = new Seleccion_fabricantes();
+		
+		unset($checked_prof);
+		if($producto->profesional == '1') $checked_prof = 'checked';		
+		echo '			<td><label>Profesional: </label><input type="checkbox" name="profesional" value="1" '.$checked_prof.' />';
+		
+		$estado = 'Activo';
+		if($producto->web == '0') $estado='Eliminado';
+		else if($producto->idsubsubfamilia==NULL) $estado='Pendiente'; 		
+		echo '<tr>
+					<td>Precio Tarifa
+					<td>Estado Actual
+					<td>Descuento
+				<tr>
+					<td>'.$producto->precio.'
+					<td>'.$estado.'
+					<td><input type="text" name="dto_producto" value="'.$producto->dto_producto.'" pattern="\d{1,2}(\.\d{1,2})?" >';
+		
+		echo '<tr>
+					<td'. $colorear['idfamilia'] . '>Familia
+					<td'. $colorear['idsubfamilia'] . '>Subfamilia
+					<td'. $colorear['idsubsubfamilia'] . '>Subsubfamilia';
+		
+		echo '<tr>';
+		
+		$seleccion_familias = new Seleccion_familias();
+		
+		echo '
+			<tr>
+				<td colspan="3" ' . $colorear['descripcion'] . '>Descripción: <br>
+		';		
+		//			<textarea name="descripcion" rows="5" cols="80">' . $producto->descripcion. '</textarea>
+		$ckeditor = new CKEditor();
+		$ckeditor->basePath = './ckeditor/';
+		$ckeditor->editor('descripcion', $producto->descripcion);
+		$ckeditor->config['height']=200;
+		$ckeditor->config['width']=800;
+		echo '
+			<tr>
+				<td colspan="3"><img src="' . $this->_config['imagenes_prod'] . '/' . $producto->imagen1 . '"><br>
+				<input type="file" name="imagen1" value=""><button name="img1" value="eliminar"><img src="./img/eliminar.png" height="14"></button>
+			<tr>
+				<td colspan="3"><img src="' . $this->_config['imagenes_prod'] . '/' . $producto->imagen2 . '"><br>
+				<input type="file" name="imagen2" value=""><button name="img2" value="eliminar"><img src="./img/eliminar.png" height="14"></button>
+			<tr>
+				<td colspan="3"><img src="' . $this->_config['imagenes_prod'] . '/' . $producto->imagen3 . '"><br>
+				<input type="file" name="imagen3" value=""><button name="img3" value="eliminar"><img src="./img/eliminar.png" height="14"></button>
+		';
+		if($producto->idproducto) {
+			echo '<tr><td colspan="3">';
+			$dto_prioritario = new Dto_prioritario($producto->idproducto);
+			$dto_prioritario->listar_dtos();
+			
+			echo '<tr><td colspan="3">';
+			$relacionado = new relacionados($producto->idproducto);
+		}
+		echo '
+			<tr>
+				<td colspan="3" >Video: <br>
+					<textarea name="video" rows="5" cols="80">' . $producto->video. '</textarea>
+		';
+		
+		echo '
+				<tr>
+					<td colspan="3" align="center">						
+						<button name="accion" value="terminar"><img src="./img/editar.png" height="14"></button>
+						<button name="accion" value="eliminar"><img src="./img/eliminar.png" height="14"></button>
+			</table>
+			</form>
+		';
+	}
+	
+	public function form_inicial_productos()
+	{
+		require 'form_productos_inicial.php';
+	}
+	
+	public function eliminar_producto($idproducto)
+	{		
+		if(!$_POST['subaccion']) {
+				echo '
+					<div style="color: red;">
+						<h3>¡ATENCIÓN! SE DISPONE A ELIMINAR "<u><b>'
+						.$_POST['producto_nombre']
+						.'"</b></u></h3>
+						<form method="post" enctype="multipart/form-data" action="">
+							<input type="hidden" name="accion" value="'. $_POST['accion'] .'">
+							<input type="hidden" name="idproducto" value="'. $_POST['idproducto'] .'">
+							<input type="submit" name="subaccion" value="Si"  class="admin">
+							<input type="submit" name="subaccion" value="No"  class="admin">
+						</form>
+					</div>
+				';
+		} elseif($_POST['subaccion']!='Si') {
+			echo '<p>No se ha realizado ningún cambio.</p><a href="'.$_SERVER['REQUEST_URI'].'"  class="admin">Volver</a>';
+		} else {
+			$sql_eliminar_producto = "UPDATE productos SET web = 0 WHERE idproducto = {$_POST['idproducto']};";
+			$consulta_productos->resultado_consulta($sql_eliminar_producto);
+			echo '<p>Producto eliminado</p><a href="'.$_SERVER['REQUEST_URI'].'" class="admin">Volver</a>';
+		}
+		
+	}
+	
+	public function eliminar_imagen($idproducto,$img)
+	{
+		$im = 'imagen'.$img;
+		$nom_imagen="SELECT $im as nombre_imagen FROM productos WHERE idproducto = idproducto;";
+		$consulta_productos->ejecutar_consulta($nom_imagen);
+		echo $nombre_imagen = $consulta_productos->registros[0]->nombre_imagen;
+		$sql_eliminar_imagen = "UPDATE productos set $im = null WHERE idproducto = idproducto;";
+		if($consulta_productos->resultado_consulta($sql_eliminar_imagen)) {
+			@unlink('./catalogo/miniaturas/'.$nombre_imagen);
+			@unlink('./catalogo/productos/'.$nombre_imagen);
+			echo '<p>Producto modificado</p><a  class="admin" href="'.$_SERVER['REQUEST_URI'].'">Volver</a>';
+		}
+	}
+	
+	public function actualizar_producto() 
+	{
+		if($_FILES) {
+			foreach($_FILES as $nombre => $variable) {
+				if($_FILES[$nombre]['name']) {
+					$nombre_archivo = $_POST['idproducto'].'_'.$nombre;
+					$subir_imagen = new Subir_imagen(
+						$_FILES[$nombre], $config->conf['imagenes_prod_grande'], $nombre_archivo, $config->conf['alto_img_prod_grande'], $config->conf['ancho_img_prod_grande']	, true, 'png'
+					);
+					$subir_thumb = new Subir_imagen(
+						$_FILES[$nombre], $config->conf['imagenes_prod'], $nombre_archivo, $config->conf['alto_img_prod'], $config->conf['ancho_img_prod'], true, 'png'
+					);
+					$_POST[$nombre] = $_POST['idproducto'].'_'.$nombre.'.png';
+				}
+			} 
+		}
+		
+		if($subir_imagen->error) {
+			echo $subir_imagen->error_txt;
+		} 
+		
+		if($subir_thumb->error) {
+			echo $subir_thumb->error_txt;
+		} 
+			
+		if(!($subir_imagen->error || $subir_thumb->error)) {
+			//hay que subir las imagenes primero y dar el ok para que de los nombres
+			$campos_opcionales = array(
+				'profesional',
+				'novedad',
+				'descripcion', 
+				'imagen1', 
+				'imagen2', 
+				'imagen3',
+				'video'
+			);
+			$set = array();
+			foreach ($campos_opcionales as $campo) {
+				if(array_key_exists($campo, $_POST)) {
+					$set[] = $campo . " = '" . $_POST[$campo] . "' ";
+				}
+			}
+			$set_cadena = implode(',', $set);
+			$sql_editar_producto = "
+				UPDATE 
+					productos 
+				SET 
+					idlinea = '{$_POST['idlinea']}',  
+					idsubsubfamilia = '{$_POST['idsubsubfamilia']}', 
+					producto_nombre_web = '{$_POST['producto_nombre_web']}', 
+					dto_producto = '{$_POST['dto_producto']}', 
+					web = 1, 
+					$set_cadena  
+				WHERE 
+					idproducto = {$_POST['idproducto']}
+			;";
+			$consulta_productos->resultado_consulta($sql_editar_producto);
+			if(!$consulta_productos->error) {
+				echo '<p>Producto modificado</p><a href="'.$_SERVER['REQUEST_URI'].'" class="admin">Volver</a>';
+			}
+		}
+	}
+	
+}
