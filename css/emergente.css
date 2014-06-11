@@ -1,14 +1,12 @@
-
 button.contacto{
 	color: #fff;
 	width: 100px;
 	height: 32px; 
 	border: 0px;
-	float: right;
 	background-color: #C9424F;
 	font-family: 'erotika';
 	font-size: 22px;
-	margin-right: 20px;
+	float: inherit;
 }
 
 
@@ -49,7 +47,9 @@ button.contacto{
 	margin-right: 10px;
 	font-family: 'arial';
 	font-size: 15px;
+	margin-bottom: 20px;
 }
+
 
 #x{
 	color: #fff;

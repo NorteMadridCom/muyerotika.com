@@ -485,3 +485,23 @@ class Editar_productos_relacionados extends Editar_productos
 	
 	
 }
+
+class Editar_descuentos_prioritarios extends Editar_productos
+{
+	
+	private $_idproducto;
+	
+	public function __construct($idproducto)
+	{
+		$this->_idproducto=$idproducto;
+		require 'form_productos_dtos_prioritarios.php'; //a formatear por bea
+	}
+	
+	private function _comprobar_duplicado(){} //comprobar que no se puedan colar dos dtos prioritarios al mismo grupo
+	
+	private function _anadir_dto_prioritario(){}
+	
+	private function _eliminar_dto_prioritario(){}
+	
+	
+}

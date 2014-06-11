@@ -8,7 +8,7 @@
 			</p> 
 			
 			
-			<button class="contacto" type="submit" name="nada" value="enviar" style="margin-right: 210px; margin-top: -5px;">Aceptar</button>
+			<button class="contacto" type="submit" name="nada" value="enviar" >Aceptar</button>
 			
 		</div>	
 	</div>

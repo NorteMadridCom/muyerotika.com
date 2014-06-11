@@ -33,7 +33,7 @@
 				
 				<br>
 				
-				<button class="contacto" type="submit" name="nada" value="" >Cancelar</button>
+				<button class="contacto" type="submit" name="nada" value="" style="margin-left: 20px;">Cancelar</button>
 				<button class="contacto" type="submit" name="nada" value="enviar" >Enviar</button>
 				
 			</div>

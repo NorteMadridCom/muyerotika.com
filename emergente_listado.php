@@ -1,13 +1,15 @@
 <!-- mensaje emergente --> 
 	<div  style="visibility: <?php echo $envio_mail->visibilidad; ?>;" class="emergente"> <!-- style="visibility:hidden;" -->
 				
-		<div id="aviso">	
-			<p>
-				Esto es un aviso normal de texto.
-			</p> 
+		<div id="listado">	
+			<ul>
+				<li>Producto</li>
+				<li>Familia</li>
+				<li>Fabricante</li>
+				<li>Stock</li>
+			</ul>
 			
-			
-			<button class="contacto" type="submit" name="nada" value="enviar" style="margin-right: 210px; margin-top: -5px;">Aceptar</button>
+			<button class="contacto" type="submit" name="nada" value="enviar" >Aceptar</button>
 		</div>
 	</div>
 <!-- fin mensaje de emergente -->

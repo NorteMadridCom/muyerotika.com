@@ -16,29 +16,6 @@
 			
 			$listado_prod->buscar_producto($_POST['idproducto']);
 			
-			
-
-//comienzo de relaxiones
-			
-		} elseif($_POST['accion']=='ordena_relacion') {
-			
-			echo '
-			<div id="dialog-message-ordenar" title="Ordena los productos" >';
-			
-			$ordenar_producto = new Ordenar('productos_relacionados','id_relacionado','nombre_producto', null, 'orden', "idproducto_ppal = {$_POST['idproducto']}");
-				if($_POST['ordenar']=='Ordenar') {
-					$ordenar_producto->ordenacion(false);
-					}
-			echo '</div>';
-			
-			$listado_prod->buscar_producto($_POST['idproducto']);
-			
-	
-
-//final de relaxciones			
-			
-			
-			
 
 		} elseif($_POST['accion']=='eliminar') {
 			
@@ -108,6 +85,26 @@
 			elseif($_POST['accion']=='buscar_relacion') $relaciones->buscar_relacion($_POST['ref'],$_POST['producto']); //muestro resultados
 			elseif($_POST['accion']=='ordenar_relacion') $relaciones->ordenar_relaciones(); //pos eso
 			$relaciones->poner_relaciones(); //cargo el form general
+			
+		} elseif($_POST['parte'] == 'producto_dto_prioritarios') {
+			
+			$dto_pri = new Editar_descuentos_prioritarios($_POST['idproducto']); 
+			
+		} elseif($_POST['parte'] == 'producto_imagenes') {
+			
+			echo 'ahora poner los imagenes';
+			
+		} elseif($_POST['parte'] == 'producto_combinaciones') {
+			
+			echo 'ahora poner los producto_combinaciones';
+			
+		} elseif($_POST['parte'] == 'producto_caracteristicas') {
+			
+			echo 'ahora poner los producto_caracteristicas';
+		
+		} elseif($_POST['parte'] == 'producto_adjuntos') {
+			
+			echo 'ahora poner los producto_adjuntos';
 			
 		} else {
 			echo "Fallamos al refrescar el formulario de Info";
