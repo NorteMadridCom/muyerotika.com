@@ -18,7 +18,7 @@ class Editar_envios
 					<form method="post" enctype="multipart/form-data" action="">
 						<td><input type="text" name="hasta_neto" value="" size="25" maxlength="100" required autofocus class="admin_caja"/>
 						<td><input type="text" name="gastos_envio" value="" size="5" maxlength="2" pattern="[0-9]{1,2}+" required class="admin_caja"/>
-						<td><button name="accion" value="Nuevo"><img src="./img/nuevo.png" height="16" /></button>
+						<td><button name="accion" value="Nuevo" class="admin"><img src="img/nuevo.png" height="16" /></button>
 					</form>
 		';
 		$sql_envios = "SELECT * FROM gastos_envios ORDER BY hasta_neto;";
@@ -32,8 +32,8 @@ class Editar_envios
 							<td><input type="text" name="hasta_neto" value="'.$envio->hasta_neto.'" size="25" maxlength="100" required autofocus class="admin_caja"/>
 							<td><input type="text" name="gastos_envio" value="'.$envio->gastos_envio.'" size="5" maxlength="25"  pattern="[0-9]{1,2}+" required class="admin_caja"/>
 							<td><input type="hidden" name="idgastos_envio" value="' . $envio->idgastos_envio . '" />
-								<button name="accion" value="Editar"><img src="./img/editar.png" height="16" /></button>
-								<button name="accion" value="Eliminar"><img src="./img/eliminar.png" height="16" /></button>
+								<button name="accion" value="Editar" class="admin"><img src="img/editar.png" height="16" /></button>
+								<button name="accion" value="Eliminar" class="admin"><img src="img/eliminar.png" height="16" /></button>
 						</form>
 				';		
 			}

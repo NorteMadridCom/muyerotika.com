@@ -51,7 +51,7 @@
 				<td colspan="3" class="titulos"><br>Video: <br><br>
 				<textarea name="video" rows="5" cols="80" class="admin_caja" style="width: 850px; height: 50px;"><?php echo $producto->video; ?></textarea>
 			<tr>
-				<td colspan="3" align="center">	<?php require $botonera; ?>
+				<td colspan="3" align="center" >	<?php require $botonera; ?>
 		</table>
 	</form>
 

@@ -126,7 +126,7 @@ require 'head.php';
 <body>
 	<!-- barra de registro (BARRA SUPERIOR) -->
 	<?php 
-	
+		require 'emergente.php'; //para borrar
 		require 'barra_superior.php'; 
 		
 		if($_SESSION['tipo_cliente']=='administrador') require 'backend.php';

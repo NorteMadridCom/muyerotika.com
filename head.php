@@ -13,6 +13,7 @@
 	<link href="css/cuerpo.css" rel="stylesheet" type="text/css" />	
 	<link href="css/footer.css" rel="stylesheet" type="text/css" />
 	<link href="css/cesta.css" rel="stylesheet" type="text/css" />
+	<link href="css/emergente.css" rel="stylesheet" type="text/css" />
 	
 	<?php
 	$titulo="Muy Erótica - Tu tienda de productos eróticos";

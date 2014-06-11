@@ -18,7 +18,7 @@ class Editar_descuentos
 					<form method="post" enctype="multipart/form-data" action="">
 						<td><input type="text" name="volumen" value="" size="25" maxlength="100" required autofocus class="admin_caja"/>
 						<td><input type="text" name="dto_volumen" value="" size="5" maxlength="2" pattern="[0-9]{1,2}+" required class="admin_caja"/>
-						<td><button name="accion" value="Nuevo"><img src="./img/nuevo.png" height="16" /></button>
+						<td><button name="accion" value="Nuevo" class="admin"><img src="img/nuevo.png" height="16" /></button>
 					</form>
 		';
 		$sql_descuentos = "SELECT * FROM dtos_volumen WHERE eliminado=0 ORDER BY dto_volumen;";
@@ -32,8 +32,8 @@ class Editar_descuentos
 							<td><input type="text" name="volumen" value="'.$descuento->volumen.'" size="25" maxlength="100" required autofocus  class="admin_caja"/>
 							<td><input type="text" name="dto_volumen" value="'.$descuento->dto_volumen.'" size="5" maxlength="2"  pattern="[0-9]{1,2}+" required  class="admin_caja"/>
 							<td><input type="hidden" name="iddto_volumen" value="' . $descuento->iddto_volumen . '" />
-								<button name="accion" value="Editar"><img src="./img/editar.png" height="16" /></button>
-								<button name="accion" value="Eliminar"><img src="./img/eliminar.png" height="16" /></button>
+								<button name="accion" value="Editar" class="admin"><img src="img/editar.png" height="16" /></button>
+								<button name="accion" value="Eliminar" class="admin"><img src="img/eliminar.png" height="16" /></button>
 						</form>
 				';		
 			}

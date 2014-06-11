@@ -26,20 +26,20 @@ class Editar_categorias
 		$categorias = new Seleccion_familias();
 		echo '<td>';
 		if(!$_POST['idsubsubfamilia']) {
-			echo '<button name="accion" value="Nuevo"  class="admin"><img src="../img/nuevo.png" height="16" /></button>';			
+			echo '<button name="accion" value="Nuevo"  class="admin"><img src="img/nuevo.png" height="16" /></button>';			
 		}
 		if($_POST['idfamilia']) {
 			echo '
-					<button name="accion" value="Editar"  class="admin"><img src="../img/editar.png" height="16" alt="Editar" /></button>
-					<button name="accion" value="Eliminar"  class="admin"><img src="../img/eliminar.png" height="16" alt="Eliminar" /></button>
+					<button name="accion" value="Editar"  class="admin"><img src="img/editar.png" height="16" alt="Editar" /></button>
+					<button name="accion" value="Eliminar"  class="admin"><img src="img/eliminar.png" height="16" alt="Eliminar" /></button>
 			';
 		}
 		if(!$_POST['idfamilia']) {
-			echo '<button name="accion" value="Ordenar_familia" class="admin"><img src="../img/ordenar.png" height="16" alt="Ordenar" /></button>';
+			echo '<button name="accion" value="Ordenar_familia" class="admin"><img src="img/ordenar.png" height="16" alt="Ordenar" /></button>';
 		} elseif(!$_POST['idsubfamilia']) {
-			echo '<button name="accion" value="Ordenar_subfamilia" class="admin"><img src="../img/ordenar.png" height="16" alt="Ordenar" /></button>';
+			echo '<button name="accion" value="Ordenar_subfamilia" class="admin"><img src="img/ordenar.png" height="16" alt="Ordenar" /></button>';
 		} elseif(!$_POST['idsubsubfamilia']) {
-			echo '<button name="accion" value="Ordenar_subsubfamilia" class="admin"><img src="../img/ordenar.png" height="16" alt="Ordenar" /></button>';
+			echo '<button name="accion" value="Ordenar_subsubfamilia" class="admin"><img src="img/ordenar.png" height="16" alt="Ordenar" /></button>';
 		}
 		echo '</table></form>';
 	}

@@ -24,7 +24,7 @@ class Editar_tipos_clientes
 		$tarifa_inicial->poner_combo() ;
 		echo '
 						<td style="padding-left: 20px;"><input type="checkbox" name="profesional" value="1" />
-						<td><button name="accion" value="Nuevo"><img src="./img/nuevo.png" height="16" /></button>
+						<td><button name="accion" value="Nuevo" class="admin"><img src="img/nuevo.png" height="16" /></button>
 					</form>
 		';
 		
@@ -46,8 +46,8 @@ class Editar_tipos_clientes
 				echo '
 							<td style="padding-left: 20px;"><input type="checkbox" name="profesional" value="1" '.$prof.'/>
 							<td><input type="hidden" name="idtipo_cliente" value="' . $tipo_cliente->idtipo_cliente . '" />
-								<button name="accion" value="Editar"><img src="./img/editar.png" height="16" /></button>
-								<button name="accion" value="Eliminar"><img src="./img/eliminar.png" height="16" /></button>
+								<button name="accion" value="Editar" class="admin"><img src="img/editar.png" height="16" /></button>
+								<button name="accion" value="Eliminar" class="admin"><img src="img/eliminar.png" height="16" /></button>
 						</form></div>
 				';		
 			}

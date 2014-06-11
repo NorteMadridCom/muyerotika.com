@@ -351,6 +351,11 @@ td.titulos{
 	font-size: 15px;
 }
 
+p.titulos{
+	font-family: 'arial';
+	font-size: 15px;
+}
+
 h2.admin{
     font-family: 'arial';
 	font-size: 15px;

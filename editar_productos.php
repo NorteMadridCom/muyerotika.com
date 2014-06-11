@@ -123,8 +123,8 @@ class Editar_productos
 					.'<td>'.$marca
 					.'<td>'.$categoria	
 					.'<td>'.$estado
-					.'<td><button name="accion" value="eliminar" class="admin"><img src="../img/eliminar.png" height="14" /></button>
-					<button name="accion" value="editar" class="admin"><img src="../img/editar.png" height="14" /></button>
+					.'<td><button name="accion" value="eliminar" class="admin"><img src="img/eliminar.png" height="14" /></button>
+					<button name="accion" value="editar" class="admin"><img src="img/editar.png" height="14" /></button>
 				</form>
 			';//editar ha de poner web = 1 y eliminar ha de poner web = 0, si es el caso
 		}
@@ -407,6 +407,7 @@ class Editar_productos_relacionados extends Editar_productos
 			$sql_relacionados = "select * 
 			from productos 
 			where ref = '$ref_rel'
+			AND idproducto != {$this->_idproducto} 
 			and web=1 
 			and idproducto not in 
 			 (
@@ -417,8 +418,9 @@ class Editar_productos_relacionados extends Editar_productos
 		} else {
 			$sql_relacionados = "select * 
 			from productos 
-			where upper(producto) like upper('%{$producto_nombre_rel}%') 
+			where producto like '%{$producto_nombre_rel}%' 
 			and web=1 
+			AND idproducto != {$this->_idproducto} 
 			 and idproducto not in 
 			 (
 			 select idproducto_relacionado 
@@ -430,13 +432,26 @@ class Editar_productos_relacionados extends Editar_productos
 		$relacionados = new Mysql();
 		$relacionados->ejecutar_consulta($sql_relacionados);
 		if(!$relacionados->numero_registros) $this->_resultado("No existen artículos");
-		elseif($relacionados->numero_registros>10) $this->_resultado("Demasiados resultados");
-		else echo "poner articulos";
+		elseif($relacionados->numero_registros>20) $this->_resultado("Demasiados resultados");
+		else {
+			foreach($relacionados->registros as $producto) {
+				echo '
+					<form method="post" enctype="multipart/form-data" action="">
+						<input name="idproducto" value="'.$this->_idproducto.'" type="hidden">
+						<input name="idprocuto_relacionado" value="'.$producto->idproducto.'" type="hidden">
+						<input name="nombre_producto" value="'.$producto->producto_nombre.'" type="hidden">
+						<input name="parte" value="'.$_POST['parte'].'" type="hidden">
+						'.$producto->producto_nombre.'
+						<button name="accion" value="anadir_relacion" class="admin"><img src="img/nuevo.png" ></button>
+					</form>
+				';
+			}
+		}
 	}
 	
-	public function anadir_relacion($idproducto_relacionado)
+	public function anadir_relacion($idproducto_relacionado, $nombre_producto)
 	{
-		$sql="INSERT INTO productos_relacionados SET idproducto_ppal={$this->_idproducto}, id_relacionado=$id_relacionado;";
+		echo $sql="INSERT INTO productos_relacionados SET idproducto_ppal={$this->_idproducto}, idproducto_relacionado=$idproducto_relacionado, nombre_producto='$nombre_producto';";
 		$eliminar_relacion = new Mysql;
 		if($eliminar_relacion->resultado_consulta($sql)===false) $this->_resultado("No se ha podido añadir la relación");
 		else $this->_resultado();
@@ -452,19 +467,19 @@ class Editar_productos_relacionados extends Editar_productos
 	
 	public function ordenar_relaciones()
 	{
-		/*
-		 * $ordenar_producto = new Ordenar('productos_relacionados','id_relacionado','nombre_producto', null, 'orden', "idproducto_ppal = {$_POST['idproducto']}");
-				if($_POST['ordenar']=='Ordenar') {
-					$ordenar_producto->ordenacion(false);
-					}
-		*/
+		
+		$ordenar_producto = new Ordenar('productos_relacionados','id_relacionado','nombre_producto', null, 'orden', "idproducto_ppal = {$this->_idproducto}");
+		if($_POST['ordenar']=='Ordenar') {
+				$ordenar_producto->ordenacion(false);
+		}
+		
 	}
 	
 	private function _resultado($error_txt=false)
 	{
 		$mensaje="Operación exitosa";
 		if($error_txt) $mensaje=$error_txt;
-		//aviso emergente
+		//emergente
 		echo $mensaje;
 	}
 	

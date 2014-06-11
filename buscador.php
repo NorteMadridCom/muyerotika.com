@@ -23,24 +23,24 @@ class Buscador_general
 			}
 		}
 		
-		if(in_array('texto', $opciones)) echo 'Buscar: <input type="text" name="buscar_txt" size="60" maxlength="60" placeholder="Buscar productos" autofocus><br>';
+		if(in_array('texto', $opciones)) echo '<p class="titulos">Buscar:<input type="text" name="buscar_txt" size="60" maxlength="60" placeholder="Buscar productos" autofocus  class="admin_caja"><br>';
 		
 		
 		if(in_array('campos', $opciones)) 
 			echo '
-				ref: <input type="text" name="ref" size="5" maxlength="5" placeholder="Nº de Id"> 
-				Id Web: <input type="text" name="idproducto_buscar" size="5" maxlength="5"><br>';
+				<br>Ref: <input type="text" name="ref" size="5" maxlength="5" placeholder="Nº de Id"  class="admin_caja"> 
+				Id Web: <input type="text" name="idproducto_buscar" size="5" maxlength="5"  class="admin_caja"><br>';
 		
 		if(in_array('categorias', $opciones)) { 
-			echo 'Familias: ';
+			echo '<br>Familias: ';
 			$categorias = new Seleccion_familias();
 			echo '<br>';
-			echo 'Marcas: ';
+			echo '<br>Marcas: ';
 			$fabricante = new Seleccion_fabricantes();
 			echo '<br>';
 		}
 		
-		echo '<input type="submit" name="buscar" value="Buscar" />
+		echo '<br><input type="submit" name="buscar" value="Buscar"  class="admin"/>
 			</form>';
 	}
 		

@@ -33,116 +33,8 @@
 			
 			$listado_prod->buscar_producto($_POST['idproducto']);
 			
-		} elseif($_POST['accion']=='nueva_relacion') {
-			//var_dump($_POST['idproducto_rel']);
-			//var_dump($_POST['idproducto_ppal']);
-			$nom_prod_rel=htmlentities($_POST['nombre_producto_rel'], ENT_QUOTES , "UTF-8");
-			$sql_poner_relacion = "INSERT INTO productos_relacionados (idproducto_ppal,idproducto_relacionado,nombre_producto)
-						values('{$_POST['idproducto_ppal']}', '{$_POST['idproducto_rel']}','$nom_prod_rel');";
 	
-			//var_dump($sql_elimina_relacionados);
-			$relacionados = new Mysql();
-			//$relacionados->ejecutar_consulta($sql_elimina_relacionados);
-			$relacionados->resultado_consulta($sql_poner_relacion);
-		
-			$listado_prod->buscar_producto($_POST['idproducto']);
-		
-		} elseif($_POST['accion']=='busca_relacion') {
-			//var_dump($_POST['id_diakros_bus']);
-			//var_dump($_POST['nombre_producto_bus']);
-			//var_dump($_POST['idproducto_ppal']);
-			
-			if($_POST['id_diakros_bus']) {
-				$sql_relacionados = "select * 
-				from productos 
-				where idproducto_diakros = '{$_POST['id_diakros_bus']}'
-				and web=1 
-				and idproducto not in 
-				 (
-				 select idproducto_relacionado 
-				 from productos_relacionados 
-				 where idproducto_ppal = '{$_POST['idproducto_ppal']}'
-				 ) ;";	
-			} else {
-				$sql_relacionados = "select * 
-				from productos 
-				where upper(producto) like upper('%{$_POST['nombre_producto_bus']}%') 
-				and web=1 
-				 and idproducto not in 
-				 (
-				 select idproducto_relacionado 
-				 from productos_relacionados 
-				 where idproducto_ppal = '{$_POST['idproducto_ppal']}'
-				 ) ;";
-				//limit 0,10;";
-			}
 
-			$relacionados = new Mysql();
-			$relacionados->ejecutar_consulta($sql_relacionados);
-	
-			echo '
-				<div id="dialog-message" title="Elementos encontrados" >';
-	
-			if (!$relacionados->registros) echo '<center><h4>Ningún artículo encontrado.</h4>'; 	
-			elseif( $relacionados->numero_registros > 10) echo '<center><h4>Demasiados artí­culos encontrados.</h4><center><h4>Especifique más la búqueda</h4>'; 	
-			else {
-				echo'	
-				<table>
-						<tr>
-							<th width="10">id
-							<th width="60">Nombre 
-							<th>Acción
-							';
-			
-	
-				foreach($relacionados->registros as $relacionado) {
-					echo '
-						<tr>
-								<form method="post" enctype="multipart/form-data" action="">
-												
-									<td><input type="text" name="id_diakros_rel" value="'.$relacionado->idproducto_diakros.'" size="10" maxlength="10" pattern="[a-zA-Z0-9_]+" />
-									<td><input type="text" name="nombre_producto_rel" value="'.$relacionado->producto_nombre.'" size="60" maxlength="200" required/>
-									<td><button name="accion" value="nueva_relacion"><img src="./img/agregar.png" height="16" /></button>	
-									<td><input type="hidden" name="idproducto_rel" value="' . $relacionado->idproducto . '" />
-									<td><input type="hidden" name="idproducto" value="' . $_POST['idproducto'] . '" />
-									<td><input type="hidden" name="idproducto_ppal" value="' . $_POST['idproducto'] . '" />
-									
-									</form>
-					';		
-				}
-			
-				echo '
-					<tr>
-						<td colspan="3">
-							';
-				echo '</table>';
-		
-			}//del else
-		
-			echo '	</div>	';
-		
-			//var_dump($relacionados);
-			
-			$listado_prod->buscar_producto($_POST['idproducto_ppal']);
-			
-			
-		} elseif($_POST['accion']=='quita_relacion') {
-			//var_dump($_POST['idproducto_rel']);
-			//var_dump($_POST['idproducto_ppal']);
-			
-			$sql_elimina_relacionados = "DELETE FROM productos_relacionados
-						WHERE idproducto_ppal='{$_POST['idproducto_ppal']}'
-						and idproducto_relacionado='{$_POST['idproducto_rel']}';";
-				//var_dump($sql_elimina_relacionados);
-			$relacionados = new Mysql();
-				//$relacionados->ejecutar_consulta($sql_elimina_relacionados);
-			$relacionados->resultado_consulta($sql_elimina_relacionados);
-			
-			$listado_prod->buscar_producto($_POST['idproducto']);
-			
-			
-			
-			
 //final de relaxciones			
 			
 			
@@ -212,8 +104,9 @@
 			
 			$relaciones = new Editar_productos_relacionados($_POST['idproducto']);
 			if($_POST['accion']=='eliminar_relacion') $relaciones->eliminar_relacion($_POST['id_relacionado']);//quito la relación
-			elseif($_POST['accion']=='anadir_relacion') $relaciones->anadir_relacion($_POST['idprocuto_relacionado']); //pongo relacion
+			elseif($_POST['accion']=='anadir_relacion') $relaciones->anadir_relacion($_POST['idprocuto_relacionado'],$_POST['nombre_producto']); //pongo relacion
 			elseif($_POST['accion']=='buscar_relacion') $relaciones->buscar_relacion($_POST['ref'],$_POST['producto']); //muestro resultados
+			elseif($_POST['accion']=='ordenar_relacion') $relaciones->ordenar_relaciones(); //pos eso
 			$relaciones->poner_relaciones(); //cargo el form general
 			
 		} else {

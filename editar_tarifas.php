@@ -18,7 +18,7 @@ class Editar_tarifas
 					<form method="post" enctype="multipart/form-data" action="">
 						<td><input type="text" name="tarifa" value="" size="25" maxlength="100" required autofocus class="admin_caja"/>
 						<td><input type="text" name="tarifa_dto" value="" size="5" maxlength="2" pattern="[0-9]{1,2}+" required class="admin_caja"/>
-						<td><button name="accion" value="Nuevo"><img src="./img/nuevo.png" height="16" /></button>
+						<td><button name="accion" value="Nuevo" class="admin"><img src="img/nuevo.png" height="16" /></button>
 					</form>
 		';
 		$sql_tarifas = "SELECT * FROM tarifas WHERE eliminado=0 ORDER BY tarifa_dto;";
@@ -32,8 +32,8 @@ class Editar_tarifas
 							<td><input type="text" name="tarifa" value="'.$tarifa->tarifa.'" size="25" maxlength="100" required autofocus class="admin_caja"/>
 							<td><input type="text" name="tarifa_dto" value="'.$tarifa->tarifa_dto.'" size="5" maxlength="2"  pattern="[0-9]{1,2}+" required class="admin_caja"/>
 							<td><input type="hidden" name="idtarifa" value="' . $tarifa->idtarifa . '" />
-								<button name="accion" value="Editar"><img src="./img/editar.png" height="16" /></button>
-								<button name="accion" value="Eliminar"><img src="./img/eliminar.png" height="16" /></button>
+								<button name="accion" value="Editar" class="admin"><img src="img/editar.png" height="16" /></button>
+								<button name="accion" value="Eliminar" class="admin"><img src="img/eliminar.png" height="16" /></button>
 						</form>
 				';		
 			}
@@ -57,7 +57,7 @@ class Editar_tarifas
 		$general->poner_combo();
 		echo '
 				<td>
-					<button name="accion" value="general"><img src="./img/actualizar.png" height="16" /></button>
+					<button name="accion" value="general" class="admin"><img src="img/actualizar.png" height="16" /></button>
 			</form>
 		';						
 	}

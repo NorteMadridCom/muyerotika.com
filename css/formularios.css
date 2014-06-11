@@ -15,6 +15,7 @@ table.contacto{
 }
 td.t_contacto{
 	color: #333;
+	float: left;
 	font-family: 'erotika';
 	font-size: 22px;
 }

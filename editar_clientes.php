@@ -128,8 +128,8 @@ class Editar_clientes
 				echo '
 						<form action="" method="post" enctype="multipart/form-data">
 							<input type="hidden" name="idcliente" value="'. $cliente->idcliente .'" />
-							<button name="accion" value="eliminar"><img src="./img/eliminar.png" height="14" /></button>
-							<button name="accion" value="editar"><img src="./img/editar.png" height="14" /></button>
+							<button name="accion" value="eliminar" class="admin"><img src="img/eliminar.png" height="14" /></button>
+							<button name="accion" value="editar" class="admin"><img src="img/editar.png" height="14" /></button>
 					</form>
 				';
 			}
@@ -156,8 +156,8 @@ class Editar_clientes
 		$tipo_cliente->poner_combo();
 		echo '
 				<span class="botones">
-					<input type="submit" name="accion" value="Buscar" class="boton" />
-					<input type="reset" name="reset" value="Cancelar" class="boton" />
+					<input type="submit" name="accion" value="Buscar"  class="admin"/>
+					<input type="reset" name="reset" value="Cancelar" class="admin"/>
 				</pan>
 			</form>
 		';

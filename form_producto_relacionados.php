@@ -26,7 +26,7 @@
 					<th width="10">Ordenar
 					
 					<form method="post" enctype="multipart/form-data" action="">
-						</form></th><td><button name="accion" value=""><img src="../img/ordenar.png" ></button>
+						</form></th><td><button name="accion" value=""  class="admin"><img src="img/ordenar.png" ></button>
 						</td><td><input name="" value="" type="hidden">
 						</td><td><input name="" value="" type="hidden">
 					

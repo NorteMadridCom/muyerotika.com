@@ -26,19 +26,19 @@ class Editar_fabricantes
 		$fabricante = new Seleccion_fabricantes();
 		echo '<td>';
 		if(!$_POST['idlinea']) {
-			echo '<button class="admin" name="accion" value="Nuevo" ><img src="../img/nuevo.png" height="16" /></button>';
+			echo '<button class="admin" name="accion" value="Nuevo" ><img src="img/nuevo.png" height="16" /></button>';
 			
 		}
 		if($_POST['idfabricante']) {
 			echo '
-					<button class="admin" name="accion" value="Editar"><img src="../img/editar.png" height="16" alt="Editar" /></button>
-					<button class="admin" name="accion" value="Eliminar"><img src="../img/eliminar.png" height="16" alt="Eliminar" /></button>
+					<button class="admin" name="accion" value="Editar"><img src="img/editar.png" height="16" alt="Editar" /></button>
+					<button class="admin" name="accion" value="Eliminar"><img src="img/eliminar.png" height="16" alt="Eliminar" /></button>
 			';
 		}
 		if(!$_POST['idfabricante']) {
-			echo '<button name="accion" value="Ordenar_fabricante" class="admin"><img src="../img/ordenar.png" height="16" alt="Ordenar" /></button>';
+			echo '<button name="accion" value="Ordenar_fabricante" class="admin"><img src="img/ordenar.png" height="16" alt="Ordenar" /></button>';
 		} elseif(!$_POST['idlinea']) {
-			echo '<button class="admin" name="accion" value="Ordenar_linea"><img src="../img/ordenar.png" height="16" alt="Ordenar" /></button>';
+			echo '<button class="admin" name="accion" value="Ordenar_linea"><img src="img/ordenar.png" height="16" alt="Ordenar" /></button>';
 		}
 		echo '
 			</table>
