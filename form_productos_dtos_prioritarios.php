@@ -6,3 +6,4 @@
 	<input name="idproducto" value="<?php echo $this->_idproducto; ?>" type="hidden">
 	<input name="parte" value="<?php echo $_POST['parte']; ?>" type="hidden">					
 </form>
+<!-- fin de form dto-pri -->
