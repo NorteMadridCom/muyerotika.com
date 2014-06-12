@@ -68,7 +68,7 @@ class Pasafoto
 	
 	public function mostrar()
 	{
-		
+		/*
 		if(is_array($this->_imagenes) && count($this->_imagenes)>0) {
 			echo '
 			<div id="orbit"> 
@@ -77,7 +77,7 @@ class Pasafoto
 			//asort($this->_imagenes);
 			foreach($this->_imagenes as $imagen) {
 				if($imagen['caption']) $caption = ' caption="'.$imagen['caption'].'" ';
-				$foto = "<img border='0' src=".$this->dir.$imagen['nombre']." $caption />";
+				$foto = '<img border="0" src="'.$this->dir.$imagen['nombre'].'"'.$caption.' />';
 				if($imagen['url']) $foto = '<a href="'.$imagen['url'].'">'.$foto.'</a>'; 
 				echo $foto;			
 			}
@@ -86,11 +86,44 @@ class Pasafoto
 			</div>
 			';
 		}
-		
+		*/
+		echo '
+		<!-- ORBIT  -->
+					
+					<div id="recuadro_orbit">
+					
+						<div id="orbit"> 
+							<img src="pasafoto/img1.jpg" data-caption="#texto_anuncio1" />
+							<img src="pasafoto/img2.jpg" data-caption="#texto_anuncio2" />
+							<img src="pasafoto/img3.jpg" data-caption="#texto_anuncio3" />
+							
+							<!-- TXT ORBIT -->
+							<span class="orbit-caption" id="texto_anuncio1">
+								<a href="#" class="orbit">
+									Descubre los nuevos estampados. </br> 
+								</a>
+							</span>
+							
+							<span class="orbit-caption" id="texto_anuncio2">
+								<a href="#" class="orbit">
+									Vibradores a todo color.  </br> 
+								</a>
+							</span>
+							
+							<span class="orbit-caption" id="texto_anuncio3">
+								<a href="#" class="orbit">
+									Afrodisiacos y aceites corporales.  </br> 
+								</a>
+							</span>
+							
+							
+						</div>	
+					</div> 
+					<!-- FIN ORBIT -->
+		';
 	}
 	
 }
-
 
 class Editar_pasafoto extends Pasafoto
 {

@@ -1,4 +1,5 @@
 <!-- mensaje emergente --> 
+	<div id="centrador_web">
 	<div  style="visibility: <?php echo $envio_mail->visibilidad; ?>;" class="emergente"> <!-- style="visibility:hidden;" -->
 			
 				
@@ -38,5 +39,6 @@
 				
 			</div>
 		
+	</div>
 	</div>
 <!-- fin mensaje de emergente -->
