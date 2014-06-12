@@ -10,6 +10,11 @@
 #featured>div,
 #featured>a { display: none; }
 
+img{
+	max-width: 100%;
+	height: auto;
+}
+
 /* CONTAINER
    ================================================== */
 div.orbit-wrapper {

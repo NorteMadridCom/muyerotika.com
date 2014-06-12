@@ -2,6 +2,7 @@
 	if( $_SESSION["tipo_cliente"] == "administrador") {
 ?>
 		<!-- MENU-->
+		<div style="background-color: #fff;">
 		<div id="menu_admin" style="float: left; margin-left: 20px;">
 				<!--
 					<div id="opcion">

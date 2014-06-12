@@ -124,6 +124,7 @@ require 'head.php';
 
 ?>
 <body>
+	<div style="background-color: #fff;">
 	<!-- barra de registro (BARRA SUPERIOR) -->
 	<?php 
 		require 'emergente.php'; //para borrar
@@ -133,6 +134,6 @@ require 'head.php';
 		else require 'frontend.php';
 		
 	?>
-
+	</div>
 </body>
 </html>

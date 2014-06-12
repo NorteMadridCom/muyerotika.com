@@ -17,7 +17,8 @@ button.contacto{
 	max-width: 700px;
 	min-height: 50px;
 	padding: 20px 20px 20px 20px;
-	margin: 500px 0px 0px 1040px;
+	margin: 400px 0px 0px 635px;
+	left: 90%;
 	position: fixed;
 	z-index: 500px;
 	background: #fff;

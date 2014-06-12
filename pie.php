@@ -40,7 +40,7 @@
 			      		</div>
 					
 						<p align="left" class="pie">
-							Muy Erotika © 2014 | Todos los derechos reservados.  <br>Powered by <a href="http://www.nortemadrid.com" target="_blank" class="pie">www.nortemadrid.com</a>
+							Muy Erótika © 2014 | Todos los derechos reservados.  <br>Powered by <a href="http://www.nortemadrid.com" target="_blank" class="pie">www.nortemadrid.com</a>
 							
 							<img src="img/crads.png" style="float: right;"/>
 						</p>
