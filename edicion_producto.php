@@ -89,6 +89,8 @@
 		} elseif($_POST['parte'] == 'producto_dto_prioritarios') {
 			
 			$dto_pri = new Editar_descuentos_prioritarios($_POST['idproducto']); 
+			if($_POST['accion']) $dto_pri->$_POST['accion']($_POST);
+			$dto_pri->poner_descuentos();
 			
 		} elseif($_POST['parte'] == 'producto_imagenes') {
 			

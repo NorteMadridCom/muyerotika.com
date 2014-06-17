@@ -323,7 +323,9 @@ class Editar_productos
 			
 			$actualizar_producto = new Mysql;
 			$actualizar_producto->resultado_consulta($sql_editar_producto);
-			$this->_resultado($actualizar_producto->error);
+			//$this->_resultado($actualizar_producto->error);
+			if($actulizar_producto->error) $this->_mensaje("No se ha podido actualizar el producto");
+			else $this->_mensaje();
 			$actualizar_producto->__destruct();
 			
 		}
@@ -363,12 +365,20 @@ class Editar_productos
 		return $nombre_web->tratar_nombre();
 	}
 	
+	/*
 	private function _resultado($error=true)
 	{
 		if(!$error) echo '<p>Producto modificado</p><a href="'.$_SERVER['REQUEST_URI'].'" class="admin">Volver</a>';
 		else echo '<p>No se ha modicado el producto</p><a href="'.$_SERVER['REQUEST_URI'].'" class="admin">Volver</a>';
 	}
-	
+	*/
+	protected function _resultado($error_txt=false)
+	{
+		$mensaje="Operación exitosa";
+		if($error_txt) $mensaje=$error_txt;
+		//emergente
+		echo $mensaje;
+	}
 }
 
 
@@ -475,33 +485,70 @@ class Editar_productos_relacionados extends Editar_productos
 		
 	}
 	
-	private function _resultado($error_txt=false)
-	{
-		$mensaje="Operación exitosa";
-		if($error_txt) $mensaje=$error_txt;
-		//emergente
-		echo $mensaje;
-	}
-	
 	
 }
+
+
 
 class Editar_descuentos_prioritarios extends Editar_productos
 {
 	
 	private $_idproducto;
+	private $_consultas_dto_pri = object;
 	
 	public function __construct($idproducto)
 	{
 		$this->_idproducto=$idproducto;
-		require 'form_productos_dtos_prioritarios.php'; //a formatear por bea
+		$this->_consultas_dto_pri = new Mysql;
 	}
 	
-	private function _comprobar_duplicado(){} //comprobar que no se puedan colar dos dtos prioritarios al mismo grupo
+	public function poner_descuentos()
+	{
+		require 'form_productos_dtos_prioritarios_inicio.php'; //a formatear por bea
+		$this->_listar_dtos_prioritarios();
+		require 'form_productos_dtos_prioritarios_nuevo.php'; //a formatear por bea
+		require 'form_productos_dtos_prioritarios_fin.php'; //a formatear por bea
+	}
 	
-	private function _anadir_dto_prioritario(){}
+	private function _listar_dtos_prioritarios()
+	{
+		$sql_listar="SELECT d.*, t.tipo_cliente FROM dtos_prioritarios d, tipos_clientes t WHERE d.idproducto={$this->_idproducto} AND d.idtipo_cliente=t.idtipo_cliente;";
+		$this->_consultas_dto_pri->ejecutar_consulta($sql_listar);
+		if(is_array($this->_consultas_dto_pri->registros)) foreach ($this->_consultas_dto_pri->registros as $dto_pri) {	 
+			require 'form_productos_dtos_prioritarios_lista.php'; //a formatear por bea
+		}
+	}
 	
-	private function _eliminar_dto_prioritario(){}
+	private function _comprobar_duplicado($idtipo_cliente)
+	{
+		$sql_duplicado="SELECT dto_prioritario FROM dtos_prioritarios WHERE idproducto={$this->_idproducto} AND idtipo_cliente=$idtipo_cliente;";
+		$this->_consultas_dto_pri->ejecutar_consulta($sql_duplicado);
+		if($this->_consultas_dto_pri->numero_registros > 0) return true;
+		return false;
+	} //comprobar que no se puedan colar dos dtos prioritarios al mismo grupo
+	
+	public function anadir_dto_prioritario($datos) //$datos=$_POST
+	{
+		if($this->_comprobar_duplicado($datos['idtipo_cliente'])!==true) {
+			$sql_anadir="INSERT INTO dtos_prioritarios SET idproducto={$datos['idproducto']}, idtipo_cliente={$datos['idtipo_cliente']}, dto_prioritario='{$datos['dto_prioritario']}';";
+			if($this->_consultas_dto_pri->resultado_consulta($sql_anadir)) $this->_resultado();
+			else $this->_resultado("No se ha podido poner el descuento");
+		} else $this->_resultado("Ya existe un descuento prioritairo asignado a este tipo de cliente");
+	}
+	
+	public function editar_dto_prioritario($datos) //$datos=$_POST
+	{
+		$sql_editar="UPDATE dtos_prioritarios SET dto_prioritario='{$datos['dto_prioritario']}' WHERE idproducto={$this->_idproducto} AND idtipo_cliente={$datos['idtipo_cliente']};";
+		if($this->_consultas_dto_pri->resultado_consulta($sql_editar)) $this->_resultado();
+		else $this->_resultado("No se ha actualizado el descuento");
+	}
+	
+	public function eliminar_dto_prioritario($datos) //$_POST
+	{
+		$sql_eliminar="DELETE FROM dtos_prioritarios WHERE idproducto={$this->_idproducto} AND idtipo_cliente={$datos['idtipo_cliente']};";
+		if($this->_consultas_dto_pri->resultado_consulta($sql_eliminar)) $this->_resultado();
+		else $this->_resultado("No se ha eliminado el descuento");
+	}
 	
 	
 }

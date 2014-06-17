@@ -36,7 +36,7 @@ class Menu_horizontal
 			for($i=0;$i<$menu->numero_registros;$i++) {
 				$matriz = (array) $menu->registros[$i];
 				
-				if($this->_dir_img) $img = '<img src="'.$this->_dir_img.'/'.$matriz['imagen'].'" class="img"/>';
+				if($this->_dir_img) $img = '<div id="iconos"><img src="'.$this->_dir_img.'/'.$matriz['imagen'].'" class="img"/></div>';
 				//else poner imagen por defecto
 				
 				$this->_link = $_SERVER['PHP_SELF'] . '?familia=' . $matriz['familia'];

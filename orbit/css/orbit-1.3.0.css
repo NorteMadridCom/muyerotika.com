@@ -17,10 +17,12 @@
 #caseStudies>div,
 #caseStudies>a { display: none; }
 
+
 img{
 	max-width: 100%;
 	height: auto;
 }
+
 
 /* CONTAINER
    ================================================== */
@@ -175,7 +177,7 @@ div.slider-nav span.left {
 
 .orbit-bullets {
     position: absolute;
-    z-index: 1000;
+    z-index: 500;
     list-style: none;
     bottom: -50px;
     left: 50%;
@@ -219,7 +221,7 @@ div.slider-nav span.left {
 
 .orbit-wrapper.fluid .orbit-bullets {
     position: absolute;
-    z-index: 1000;
+    z-index: 500;
     list-style: none;
     bottom: -50px;
     left: 50%;

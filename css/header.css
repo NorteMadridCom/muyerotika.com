@@ -20,15 +20,13 @@ button.usuario{
 }
 
 /*Nav*/
-img.img{
-	 margin-top: -65px;
-	 margin-left: 60px;
-	 float: left;
+#iconos{
+	margin-top: -70px;
 }
 
 nav{
 	clear: both;
-	margin-bottom: 130px;
+	margin-bottom: 110px;
 	
 }
 
@@ -65,7 +63,7 @@ nav{
   .menu li a.menuitem{/*Enlace del menú principal "lo que se el nombre"*/
     color: #000;
     display: block;
-    padding: 65px 0px 15px;
+    padding: 65px 0px 35px;
     margin: -5px 0;
     text-decoration: none;
   }

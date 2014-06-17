@@ -1,10 +1,10 @@
-<!-- mensaje emergente --> 
-	<div id="centrador_web">
+<!-- mensaje emergente -->
+<div class="ocultar"></div> 
 	<div  style="visibility: <?php echo $envio_mail->visibilidad; ?>;" class="emergente"> <!-- style="visibility:hidden;" -->
 			
 				
 			<form action="" method="post" enctype="multipart/formdata">	
-			<div id="formulario">
+			<div id="formulario" style="width: ">
 				<table  style="margin-right: 20px;">
 								
 					<tbody>
@@ -39,6 +39,5 @@
 				
 			</div>
 		
-	</div>
 	</div>
 <!-- fin mensaje de emergente -->

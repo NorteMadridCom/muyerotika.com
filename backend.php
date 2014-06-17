@@ -2,7 +2,7 @@
 	if( $_SESSION["tipo_cliente"] == "administrador") {
 ?>
 		<!-- MENU-->
-		<div style="background-color: #fff;">
+		<div style="background-color: #fff; ">
 		<div id="menu_admin" style="float: left; margin-left: 20px;">
 				<!--
 					<div id="opcion">
@@ -94,6 +94,7 @@
 			
 		</div>
 	
+		<div style="clear: both;"></div>
 		<div style="margin-top: 20px; margin-left: 250px; "> 
 		
 		<?php require 'cuerpo_admin.php'; ?>

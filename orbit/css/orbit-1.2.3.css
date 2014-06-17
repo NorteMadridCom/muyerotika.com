@@ -1,16 +1,14 @@
 #orbit { 
-	margin-top: 100px;
-	margin-left: 0px;
-	width: 900px;
-	height: 300px;
-	background: #000 url('../orbit/loading.gif') no-repeat center center;
+	background: #fff url('../orbit/loading.gif') no-repeat center center;
 	overflow: hidden;
+	top: 0px;
 }
 #featured>img,  
 #featured>div,
 #featured>a { display: none; }
 
-img{
+
+#orbit>img{
 	max-width: 100%;
 	height: auto;
 }
@@ -21,8 +19,6 @@ div.orbit-wrapper {
     width: 1px;
     height: 1px;
     position: relative;
-    margin-left: 0px;
-    margin-bottom: 50px;
 }
 
 div.orbit {
@@ -36,7 +32,7 @@ div.orbit>img {
     position: absolute;
     top: 0;
     left: 0;
-    display: none; 
+    /*display: none; */
 }
 
 div.orbit>a {
@@ -66,10 +62,10 @@ div.timer {
     overflow: hidden;
     position: absolute;
     top: 120px;
-    right: 10px;
+    right: 30px;
     opacity: .6;
     cursor: pointer;
-    z-index: 1001; 
+    z-index: 998; 
 }
 
 span.rotator {
@@ -129,8 +125,7 @@ span.pause.active {
 .orbit-caption {
     display: none;
     padding: 20px 0px 20px 0px;
-	/*background-color: #999;*/
-	height: 20px; 
+	height: 40px; 
 	
 }
 
@@ -138,17 +133,18 @@ span.pause.active {
     z-index: 9;
 	text-align: center;
 	padding: 7px 5;
-	position: absolute;
+	font-family: 'omnes';
+    font-size: 16px;
+    position: absolute;
+    bottom: 0px;
     width: 100%;
-    opacity: 0.8;
-    margin-top: -10px;
+    /*opacity: 0.6;*/
 }
 
 a.orbit{
-	color: #000;
-	font-family: 'erotika';
-    font-size: 25px;
-    margin-left: -20px;
+	color: #333;
+	font-size: 22px;
+	font-family: 'erotika';	
 }
 
 /* DIRECTIONAL NAV
@@ -163,32 +159,47 @@ div.slider-nav span {
     text-indent: -9999px;
     position: absolute;
     z-index: 9;
-    top: 20px;
+    top: 80%;
+    
+   
     cursor: pointer; 
 }
 
 div.slider-nav span.right {
-    background: url(../orbit/right-arrow.png);
+   background: url(../orbit/right-arrow.png);
     background-repeat: no-repeat;
-    right: 2px; 
-    margin-top: 230px;
+    right: 0px; 
+    opacity: 0.5;
 }
 
-div.slider-nav span.left {
-    background: url(../orbit/left-arrow.png);
-    background-repeat: no-repeat;
-    left: 2px; 
-    margin-top: 230px;
+div.slider-nav span.right:hover {
+ 	opacity: 1;
 }
+
+
+div.slider-nav span.left {
+   background: url(../orbit/left-arrow.png);
+    background-repeat: no-repeat;
+    left: 0px; 
+    opacity: 0.5;
+}
+
+div.slider-nav span.left:hover {
+ 	opacity: 1;
+}
+
+
 
 /* BULLET NAV
    ================================================== */
 .orbit-bullets {
     position: absolute;
-    z-index: 1000;
+    z-index: 50;
     list-style: none;
+    bottom: 0px;
     left: 50%;
-	margin: 50px 0px 0px -50px;
+    top: 87%;
+	margin-left: -35px;
     padding: 0; }
 
 .orbit-bullets li {
@@ -218,3 +229,23 @@ div.slider-nav span.left {
     background-position: 0 0;
     border-top: 2px solid #000; 
 }
+
+/* FLUID LAYOUT
+   ================================================== */
+.orbit-wrapper.fluid .orbit .fluid-placeholder {
+    visibility: hidden;
+    position: static;
+    display: block;
+    width: 100%; }
+
+.orbit-wrapper.fluid .orbit, .orbit-wrapper.fluid { 
+    width: 100% !important; }
+
+.orbit-wrapper.fluid .orbit-bullets {
+    position: absolute;
+    z-index: 50;
+    list-style: none;
+    bottom: -50px;
+    left: 50%;
+    margin-left: -50px;
+    padding: 0; }
