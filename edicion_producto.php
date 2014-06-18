@@ -2,22 +2,7 @@
 
 
 
-		if($_POST['accion']=='poner_dto_pri') {
-			
-			$sql_poner_dto_pri = "INSERT INTO dtos_prioritarios SET idtipo_cliente={$_POST['idtipo_cliente']}, idproducto={$_POST['idproducto']}, dto_prioritario={$_POST['dto_prioritario']};";
-			$consulta_productos->resultado_consulta($sql_poner_dto_pri);
-			
-			$listado_prod->buscar_producto($_POST['idproducto']);
-			
-		} elseif($_POST['accion']=='quitar_dto_pri') {
-			
-			$sql_quitar_dto_pri = "DELETE FROM dtos_prioritarios WHERE idtipo_cliente={$_POST['idtipo_cliente']} AND idproducto={$_POST['idproducto']};";
-			$consulta_productos->resultado_consulta($sql_quitar_dto_pri);
-			
-			$listado_prod->buscar_producto($_POST['idproducto']);
-			
-
-		} elseif($_POST['accion']=='eliminar') {
+		if($_POST['accion']=='eliminar') {
 			
 			$listado_prod->eliminar_producto($_POST['idproducto']);
 

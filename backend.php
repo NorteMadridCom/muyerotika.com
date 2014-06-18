@@ -94,11 +94,12 @@
 			
 		</div>
 	
-		<div style="clear: both;"></div>
 		<div style="margin-top: 20px; margin-left: 250px; "> 
 		
 		<?php require 'cuerpo_admin.php'; ?>
 		</div>
+		
+		<div style="clear: both;"></div>
 	</div>
 <?php 
 	}

@@ -1,10 +1,11 @@
 <!-- mensaje emergente -->
 <div class="ocultar"></div> 
-	<div  style="visibility: <?php echo $envio_mail->visibilidad; ?>;" class="emergente"> <!-- style="visibility:hidden;" -->
+	<div  style="visibility: <?php echo $envio_mail->visibilidad; ?>;" class="emergente" <!-- style="visibility:hidden;" -->
 			
-				
+			<a class="x" href="#">X</a>		
 			<form action="" method="post" enctype="multipart/formdata">	
-			<div id="formulario" style="width: ">
+			<div id="formulario" >
+				
 				<table  style="margin-right: 20px;">
 								
 					<tbody>

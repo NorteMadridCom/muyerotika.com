@@ -1,16 +1,11 @@
+<!-- capa ocultacion -->
+<div class="ocultar"></div>
+<!-- fin capa ocultacion -->
 <!-- mensaje emergente --> 
-		<div class="ocultar"></div>
-			<div  style="visibility: <?php echo $envio_mail->visibilidad; ?>;" class="emergente"> <!-- style="visibility:hidden;" -->
-				
-			
-				<div id="aviso_importante">
-					<p>
-						¡Esto es un aviso muy muy importante con letras en rojo y negrita!
-					</p> 
-					
-					
-					<button class="contacto" type="submit" name="nada" value="enviar" >Aceptar</button>
-					
-			</div>	
-		</div>
+<div  id="emerge" class="emergente" style="display:block;">
+	<div id="aviso">	
+		<p><?php echo $mensaje; ?></p>
+		<?php echo $form; ?>
+	</div>
+</div>
 <!-- fin mensaje de emergente -->

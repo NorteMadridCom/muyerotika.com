@@ -127,7 +127,7 @@ require 'head.php';
 	<div style="background-color: #fff;">
 	<!-- barra de registro (BARRA SUPERIOR) -->
 	<?php 
-		require 'emergente_listado.php'; //para borrar
+		//require 'emergente_formulario.php'; //para borrar
 		require 'barra_superior.php'; 
 		
 		if($_SESSION['tipo_cliente']=='administrador') require 'backend.php';

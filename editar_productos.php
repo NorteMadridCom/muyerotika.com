@@ -29,8 +29,11 @@ class Editar_productos
 		} else echo 'No hay resultados';
 	}
 	
-	public function buscar_producto($idproducto)
+	public function buscar_producto($idproducto=false,$ref=false)
 	{
+		if($idproducto) $where = "p.idproducto = $idproducto";
+		elseif($ref) $where = "p.ref = '$ref'";
+		else die ("No hay referncia de producto a buscar");
 		$prod = new Mysql;
 		$sql_producto = "
 			SELECT 
@@ -48,7 +51,7 @@ class Editar_productos
 				LEFT JOIN subfamilias s USING (idsubfamilia) 
 				LEFT JOIN familias f USING (idfamilia) 
 			WHERE
-				p.idproducto = $idproducto
+				$where 
 		;";		
 		$prod->ejecutar_consulta($sql_producto);
 		//necesario porque el objeto seleccion familias se alimenta de POST
@@ -141,10 +144,7 @@ class Editar_productos
 	{
 
 		if($marcar_error) {
-			//tal y como está, esto sólo sale si la referencia ya existe, pero
-			//podemos hacer un objeto que recoga la var dentro de la matriz y genere mensajes mas complejos
-			$mensaje = "La referencia ya existe.";
-			require 'mensaje_flotante.php';
+			$this->_resultado("La referencia ya existe.");
 		}
 		
 		unset($checked_novedad);
@@ -170,7 +170,6 @@ class Editar_productos
 	
 	public function editar_producto_relacionados($producto=false)
 	{
-		//require 'form_producto_relacionados.php'; //no realizado
 		$relacion=new  Editar_productos_relacionados($producto);
 	}
 	
@@ -324,8 +323,8 @@ class Editar_productos
 			$actualizar_producto = new Mysql;
 			$actualizar_producto->resultado_consulta($sql_editar_producto);
 			//$this->_resultado($actualizar_producto->error);
-			if($actulizar_producto->error) $this->_mensaje("No se ha podido actualizar el producto");
-			else $this->_mensaje();
+			if($actualizar_producto->error) $this->_resultado("No se ha podido actualizar el producto",false,true);
+			else $this->_resultado(false,true,true);
 			$actualizar_producto->__destruct();
 			
 		}
@@ -372,13 +371,48 @@ class Editar_productos
 		else echo '<p>No se ha modicado el producto</p><a href="'.$_SERVER['REQUEST_URI'].'" class="admin">Volver</a>';
 	}
 	*/
-	protected function _resultado($error_txt=false)
+	protected function _resultado($error_txt=false,$continuar=false,$volver=false,$form=false)
 	{
 		$mensaje="Operación exitosa";
 		if($error_txt) $mensaje=$error_txt;
-		//emergente
-		echo $mensaje;
+		if(!$form) $form = $this->_botones_emergente($continuar,$volver);
+		require 'emergente.php';
 	}
+	
+	protected function _inputs($parte=false)
+	{
+		$cadena=array();
+		if(!$_POST['idproducto']) {
+			$producto=$this->buscar_producto(false,$_POST['ref']);
+			$cadena['idproducto']=$producto->idproducto;
+		} 
+		if($parte) $cadena['parte']=$_POST['parte'];
+		$inputs="";
+		foreach($cadena as $var=>$val) {
+			$inputs .= '<input type="hidden" name="'.$var.'" value="'.$val.'" />';
+		}
+		return $inputs;
+	}
+	
+	protected function _botones_emergente($continuar=false,$volver=false)
+	{
+		$form="";
+		if($continuar) $form .= '
+		<form action="" method="POST" enctype="multipart/from-data">
+			'.$this->_inputs(true).'
+			<button class="contacto" >Continuar</button>
+		</form>
+		';
+		if($volver) $form .= '
+		<form action="" method="POST" enctype="multipart/from-data">
+			'.$this->_inputs().'
+			<button class="contacto" >Volver</button>
+		</form>
+		';
+		if(!$continuar && !$volver) $form .= '<button class="contacto" onclick="ocultar(\'emerge\')">Aceptar</button>';
+		return $form;
+	}
+	
 }
 
 
@@ -444,8 +478,9 @@ class Editar_productos_relacionados extends Editar_productos
 		if(!$relacionados->numero_registros) $this->_resultado("No existen artículos");
 		elseif($relacionados->numero_registros>20) $this->_resultado("Demasiados resultados");
 		else {
+			$form="";
 			foreach($relacionados->registros as $producto) {
-				echo '
+				$form .= '
 					<form method="post" enctype="multipart/form-data" action="">
 						<input name="idproducto" value="'.$this->_idproducto.'" type="hidden">
 						<input name="idprocuto_relacionado" value="'.$producto->idproducto.'" type="hidden">
@@ -456,6 +491,7 @@ class Editar_productos_relacionados extends Editar_productos
 					</form>
 				';
 			}
+			$this->_resultado("Lista de productos", false, false,$form);
 		}
 	}
 	
@@ -464,7 +500,7 @@ class Editar_productos_relacionados extends Editar_productos
 		echo $sql="INSERT INTO productos_relacionados SET idproducto_ppal={$this->_idproducto}, idproducto_relacionado=$idproducto_relacionado, nombre_producto='$nombre_producto';";
 		$eliminar_relacion = new Mysql;
 		if($eliminar_relacion->resultado_consulta($sql)===false) $this->_resultado("No se ha podido añadir la relación");
-		else $this->_resultado();
+		//else $this->_resultado();
 	}
 	
 	public function eliminar_relacion($id_relacionado)
@@ -472,7 +508,7 @@ class Editar_productos_relacionados extends Editar_productos
 		echo $sql="DELETE FROM productos_relacionados WHERE id_relacionado=$id_relacionado;";
 		$eliminar_relacion = new Mysql;
 		if($eliminar_relacion->resultado_consulta($sql)===false) $this->_resultado("No se ha podido quitar la relación");
-		else $this->_resultado();
+		//else $this->_resultado();
 	}
 	
 	public function ordenar_relaciones()
@@ -480,7 +516,7 @@ class Editar_productos_relacionados extends Editar_productos
 		
 		$ordenar_producto = new Ordenar('productos_relacionados','id_relacionado','nombre_producto', null, 'orden', "idproducto_ppal = {$this->_idproducto}");
 		if($_POST['ordenar']=='Ordenar') {
-				$ordenar_producto->ordenacion(false);
+				$ordenar_producto->ordenacion();
 		}
 		
 	}
