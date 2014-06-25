@@ -51,8 +51,8 @@ class Buscador_general
 			$a_quitar=array ('á','é','í','ó','ú', 'ñ', 'Á', 'É', 'Í', 'Ó', 'Ú', 'Ñ', 'ü', 'Ü', "'");
 			$texto=str_ireplace($a_quitar,'%',$_POST['buscar_txt']);
 			$buscar = new Buscador_texto($texto);
-		} elseif($_POST['idproducto_diakros'] || $_POST['idproducto_buscar']) {
-			$campos['idproducto_diakros']=$_POST['idproducto_diakros'];
+		} elseif($_POST['ref'] || $_POST['idproducto_buscar']) {
+			$campos['ref']=$_POST['ref'];
 			$campos['idproducto']=$_POST['idproducto_buscar'];
 			$buscar = new Buscador_campos($campos);
 		} elseif($_POST['idsubsubfamilia'] || $_POST['idsubfamilia'] || $_POST['idfamilia'] || $_POST['idfabricante'] || $_POST['idlinea']) {

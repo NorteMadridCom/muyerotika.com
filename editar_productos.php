@@ -5,12 +5,6 @@ class Editar_productos
 	/*
 	 * requiere el paginador.php
 	 */
-	private $_config;
-	
-	public function __construct($config) 
-	{
-		$this->_config=$config->conf;
-	}
 	
 	public function listar_productos_paginados($sql_listar_productos)
 	{
@@ -203,47 +197,7 @@ class Editar_productos
 		}
 		
 	}
-	/*
-	public function eliminar_imagen($idproducto,$img)
-	{
-		$im = 'imagen'.$img;
-		$nom_imagen="SELECT $im as nombre_imagen FROM productos WHERE idproducto = idproducto;";
-		$consulta_productos->ejecutar_consulta($nom_imagen);
-		echo $nombre_imagen = $consulta_productos->registros[0]->nombre_imagen;
-		$sql_eliminar_imagen = "UPDATE productos set $im = null WHERE idproducto = idproducto;";
-		if($consulta_productos->resultado_consulta($sql_eliminar_imagen)) {
-			@unlink('./catalogo/miniaturas/'.$nombre_imagen);
-			@unlink('./catalogo/productos/'.$nombre_imagen);
-			echo '<p>Producto modificado</p><a  class="admin" href="'.$_SERVER['REQUEST_URI'].'">Volver</a>';
-		}
-	}
 	
-	private function _subir_imagenes()
-	{
-		if($_FILES) {
-			foreach($_FILES as $nombre => $variable) {
-				if($_FILES[$nombre]['name']) {
-					$nombre_archivo = $_POST['idproducto'].'_'.$nombre;
-					$subir_imagen = new Subir_imagen(
-						$_FILES[$nombre], $config->conf['imagenes_prod_grande'], $nombre_archivo, $config->conf['alto_img_prod_grande'], $config->conf['ancho_img_prod_grande']	, true, 'png'
-					);
-					$subir_thumb = new Subir_imagen(
-						$_FILES[$nombre], $config->conf['imagenes_prod'], $nombre_archivo, $config->conf['alto_img_prod'], $config->conf['ancho_img_prod'], true, 'png'
-					);
-					$_POST[$nombre] = $_POST['idproducto'].'_'.$nombre.'.png';
-				}
-			} 
-		}
-		
-		if($subir_imagen->error) echo $subir_imagen->error_txt;
-		
-		if($subir_thumb->error) echo $subir_thumb->error_txt;
-		
-		if(!($subir_imagen->error || $subir_thumb->error)) return true;
-		else return false;
-	
-	}
-	*/
 	public function actualizar_producto_info($producto=array()) 
 	{
 
@@ -364,13 +318,6 @@ class Editar_productos
 		return $nombre_web->tratar_nombre();
 	}
 	
-	/*
-	private function _resultado($error=true)
-	{
-		if(!$error) echo '<p>Producto modificado</p><a href="'.$_SERVER['REQUEST_URI'].'" class="admin">Volver</a>';
-		else echo '<p>No se ha modicado el producto</p><a href="'.$_SERVER['REQUEST_URI'].'" class="admin">Volver</a>';
-	}
-	*/
 	protected function _resultado($error_txt=false,$continuar=false,$volver=false,$form=false)
 	{
 		$mensaje="Operación exitosa";
@@ -382,7 +329,7 @@ class Editar_productos
 	protected function _inputs($parte=false)
 	{
 		$cadena=array();
-		if(!$_POST['idproducto']) {
+		if(!$_POST['idproducto'] && !$this->_idproducto) {
 			$producto=$this->buscar_producto(false,$_POST['ref']);
 			$cadena['idproducto']=$producto->idproducto;
 		} 
@@ -497,7 +444,7 @@ class Editar_productos_relacionados extends Editar_productos
 	
 	public function anadir_relacion($idproducto_relacionado, $nombre_producto)
 	{
-		echo $sql="INSERT INTO productos_relacionados SET idproducto_ppal={$this->_idproducto}, idproducto_relacionado=$idproducto_relacionado, nombre_producto='$nombre_producto';";
+		$sql="INSERT INTO productos_relacionados SET idproducto_ppal={$this->_idproducto}, idproducto_relacionado=$idproducto_relacionado, nombre_producto='$nombre_producto';";
 		$eliminar_relacion = new Mysql;
 		if($eliminar_relacion->resultado_consulta($sql)===false) $this->_resultado("No se ha podido añadir la relación");
 		//else $this->_resultado();
@@ -505,7 +452,7 @@ class Editar_productos_relacionados extends Editar_productos
 	
 	public function eliminar_relacion($id_relacionado)
 	{
-		echo $sql="DELETE FROM productos_relacionados WHERE id_relacionado=$id_relacionado;";
+		$sql="DELETE FROM productos_relacionados WHERE id_relacionado=$id_relacionado;";
 		$eliminar_relacion = new Mysql;
 		if($eliminar_relacion->resultado_consulta($sql)===false) $this->_resultado("No se ha podido quitar la relación");
 		//else $this->_resultado();
@@ -586,5 +533,107 @@ class Editar_descuentos_prioritarios extends Editar_productos
 		else $this->_resultado("No se ha eliminado el descuento");
 	}
 	
+	
+}
+
+class Editar_productos_imagenes extends Editar_productos
+{
+	/*
+	 * Las imágenes se han de cofificar como: idweb_nombre-del-producto_xxx.ext
+	 * xxx -> es el orden/numero de imagen
+	 * nombre-del-producto  es el real
+	 */
+	 
+	private $_config;
+	private $_idproducto;
+	private $_imagenes = object;
+	 
+	public function __construct($idproducto,$config)
+	{
+		$this->_config = $config->conf;
+		$this->_idproducto = $idproducto;
+		$this->_imagenes = new Mysql;
+	}
+	
+	public function mostrar_imagenes() 
+	{
+		
+		$sql_imagenes = "SELECT * FROM productos_imagenes WHERE idproducto={$this->_idproducto}";
+		$this->_imagenes->ejecutar_consulta($sql_imagenes);
+		if(is_array($this->_imagenes->registros) && $this->_imagenes->numero_registros>0) {
+			foreach($this->_imagenes->registros as $imagen) {
+				//ponemos la imagen con la "X"
+				$dir = $this->_config['imagenes_prod_thumbs'];
+			}
+		} elseif($this->_imagenes->numero_registos=0) echo "Este producto no tiene imágenes.";
+		
+		//$this->_inputs($_POST['parte']); //poner en todos los form, lleva lo que necesita el form
+		
+		/**********
+		 * me quedao aki
+		 * |
+		 * |
+		 * |
+		 * \/
+		  
+
+		echo '
+			<div style="width: 99%"> 	
+				<form action="" method="post" enctype="multipart/form-data">
+		';
+		foreach($_POST as $var=>$val) {
+			if(!strstr($var, 'galeria') || !strstr($var, 'accion')) echo '<input type="hidden" name="'.$var.'" value="'.$val.'" />';
+		}
+	
+		echo '
+				<div id="menu_bloques">
+					<div id="titulo_galeria" >
+						Imagen: <input type="file" name="galeria_imagen" value="" />
+						<div id="derecha">
+							<button type="submit" name="galeria_accion" value="nueva" style="margin-top: 20px;">Cargar Imagen</button>
+						</div>
+					</div>
+				</div>
+					
+				<form>
+				<br>
+			';		
+		if(is_array($this->_imagenes) && count($this->_imagenes)>0) {
+			foreach($this->_imagenes as $imagen) {	
+				$src = ' src="'.$this->_thumb_dir.$imagen['nombre'].'" ';
+				echo '
+				<div style="margin: 5px 0px 0px 20px; float: left;">
+				<form action="'.$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'].'" method="post" enctype="multipart/form-data">
+				';
+				foreach($_POST as $var=>$val) {
+					if(!strstr($var, 'galeria') || !strstr($var, 'accion')) echo '<input type="hidden" name="'.$var.'" value="'.$val.'" />';
+				}
+				echo '
+					<input type="hidden" name="galeria_imagen" value="'.$imagen['nombre'].'" />
+					<button type="submit" name="galeria_accion" value="eliminar" style="color: red; z-index: 100; font-size: 30px; position: absolute; background-color: rgba(0,0,0,0.5); border:none; width: 35px; height: 35px;" >X</button>
+					<img '.$src.' width="'.$this->_ancho.'" height="'.$this->_alto.'" />
+				</form>
+				</div>
+				';		
+			}			
+		}
+		echo '
+			</div>
+		';
+	}
+	
+	public function subir()
+	{
+
+		$img1 = new Subir_imagen($_FILES['galeria_imagen'], $this->_dir);
+		if($this->_para_texto===false) $img2 = new Subir_imagen($_FILES['galeria_imagen'], $this->_dir.'thumbs', $nombre = NULL, $alto=230 , $ancho=230, $proporcional = true, $recorte=true);
+		
+	}
+	
+	public function eliminar()
+	{
+		unlink($this->_dir.$_POST['galeria_imagen']);
+		if($this->_para_texto===false) unlink($this->_thumb_dir.$_POST['galeria_imagen']);
+	}
 	
 }

@@ -79,7 +79,8 @@
 			
 		} elseif($_POST['parte'] == 'producto_imagenes') {
 			
-			echo 'ahora poner los imagenes';
+			$imagenes=new Editar_productos_imagenes($_POST['idproducto'],$config);
+			$imagenes->mostrar_imagenes();
 			
 		} elseif($_POST['parte'] == 'producto_combinaciones') {
 			

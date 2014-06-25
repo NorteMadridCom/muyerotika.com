@@ -1,7 +1,7 @@
 <?php
 
 	$consulta_productos = New Mysql;	
-	$listado_prod = new Editar_productos($config);
+	$listado_prod = new Editar_productos();
 
 	if($_POST['idproducto'] && $_POST['accion']!='Ordenar') { //edición del producto
 		
