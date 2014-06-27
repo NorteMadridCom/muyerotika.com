@@ -557,83 +557,109 @@ class Editar_productos_imagenes extends Editar_productos
 	
 	public function mostrar_imagenes() 
 	{
-		
-		$sql_imagenes = "SELECT * FROM productos_imagenes WHERE idproducto={$this->_idproducto}";
+
+		$sql_imagenes = "SELECT pi.*, i.imagen FROM productos_imagenes pi, imagenes i WHERE i.idimagen=pi.idimagen AND pi.idproducto={$this->_idproducto} ORDER BY pi.orden;";
 		$this->_imagenes->ejecutar_consulta($sql_imagenes);
 		if(is_array($this->_imagenes->registros) && $this->_imagenes->numero_registros>0) {
 			foreach($this->_imagenes->registros as $imagen) {
-				//ponemos la imagen con la "X"
-				$dir = $this->_config['imagenes_prod_thumbs'];
+				//codificacion de la imagen: id_nombre-del-producto_xxx.ext (xxx es el numero de imagen)
+				$src = ' src="'.$this->_config['imagenes_prod_thumbs'].'/'.$imagen['imagen'].'" ';
+				$alto = ' height="'.$this->_config['alto_img_prod_thumbs'].'" ';
+				$ancho = ' width="'.$this->_config['ancho_img_prod_thumbs'].'" ';
+				require 'form_productos_imagenes_editar.php';
 			}
 		} elseif($this->_imagenes->numero_registos=0) echo "Este producto no tiene imágenes.";
 		
 		//$this->_inputs($_POST['parte']); //poner en todos los form, lleva lo que necesita el form
 		
-		/**********
-		 * me quedao aki
-		 * |
-		 * |
-		 * |
-		 * \/
-		  
-
-		echo '
-			<div style="width: 99%"> 	
-				<form action="" method="post" enctype="multipart/form-data">
-		';
-		foreach($_POST as $var=>$val) {
-			if(!strstr($var, 'galeria') || !strstr($var, 'accion')) echo '<input type="hidden" name="'.$var.'" value="'.$val.'" />';
-		}
+		require 'form_productos_imagenes_nueva.php';
+		
+	}
 	
-		echo '
-				<div id="menu_bloques">
-					<div id="titulo_galeria" >
-						Imagen: <input type="file" name="galeria_imagen" value="" />
-						<div id="derecha">
-							<button type="submit" name="galeria_accion" value="nueva" style="margin-top: 20px;">Cargar Imagen</button>
-						</div>
-					</div>
-				</div>
-					
-				<form>
-				<br>
-			';		
-		if(is_array($this->_imagenes) && count($this->_imagenes)>0) {
-			foreach($this->_imagenes as $imagen) {	
-				$src = ' src="'.$this->_thumb_dir.$imagen['nombre'].'" ';
-				echo '
-				<div style="margin: 5px 0px 0px 20px; float: left;">
-				<form action="'.$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'].'" method="post" enctype="multipart/form-data">
-				';
-				foreach($_POST as $var=>$val) {
-					if(!strstr($var, 'galeria') || !strstr($var, 'accion')) echo '<input type="hidden" name="'.$var.'" value="'.$val.'" />';
-				}
-				echo '
-					<input type="hidden" name="galeria_imagen" value="'.$imagen['nombre'].'" />
-					<button type="submit" name="galeria_accion" value="eliminar" style="color: red; z-index: 100; font-size: 30px; position: absolute; background-color: rgba(0,0,0,0.5); border:none; width: 35px; height: 35px;" >X</button>
-					<img '.$src.' width="'.$this->_ancho.'" height="'.$this->_alto.'" />
-				</form>
-				</div>
-				';		
-			}			
-		}
-		echo '
-			</div>
-		';
+	private function _comprobar_nombre($nombre)
+	{
+		$comp_nombre = new Mysql;
+		$nombre_n=$nombre.$i;
+		$sql_comprobar_nombre="SELECT nombre FROM imagenes WHERE nombre=$nombre_n;";
+		$comp_nombre->ejecutar_consulta($sql_comprobar_nombre);
+		if($comp_nombre->resultado_consulta>0) return FALSE;
+		else return $nombre_n;
 	}
 	
 	public function subir()
 	{
-
-		$img1 = new Subir_imagen($_FILES['galeria_imagen'], $this->_dir);
-		if($this->_para_texto===false) $img2 = new Subir_imagen($_FILES['galeria_imagen'], $this->_dir.'thumbs', $nombre = NULL, $alto=230 , $ancho=230, $proporcional = true, $recorte=true);
+		$producto=$this->buscar_producto($this->_idproducto);
 		
+		$i=0;
+		$nombre="{$producto->idproducto}_{$producto->producto}_";
+		while($this->_comprobar_nombre($nombre, $i)==FALSE) $i++;
+		$nombre=$nombre_p.$i;
+		
+		$img_grande = new Subir_imagen($_FILES['imagen'], $this->_config['imagenes_prod_grandes'], $nombre);
+		$img_media = new Subir_imagen(
+			$_FILES['imagen'], 
+			$dir=$this->_config['imagenes_prod_media'], 
+			$nombre, 
+			$alto=$this->_config['alto_img_prod_media'] , 
+			$ancho=$this->_config['ancho_img_prod_media'] , 
+			$proporcional = true, 
+			$recorte=false
+		);
+		$img_thumbs = new Subir_imagen(
+			$_FILES['imagen'], 
+			$dir=$this->_config['imagenes_prod_thumbs'], 
+			$nombre, 
+			$alto=$this->_config['alto_img_prod_thumbs'] , 
+			$ancho=$this->_config['ancho_img_prod_thumbs'] , 
+			$proporcional = true, 
+			$recorte=false
+		);
+		
+		if($img_grande->error===FALSE && $img_media->error===FALSE && $img_thumbs->error===FALSE) {
+			$img=new Mysql;
+			$sql_img="INSERT INTO imagenes SET imagen='$nombre';";
+			if($img->resultado_consulta($sql_img)) $this->_imagen_producto($this->_idproducto,$img->id_ultimo_registro);
+		} else {
+			//aviso y elimnar las imagen en archivo y en BD
+		}
 	}
 	
-	public function eliminar()
+	protected function _imagen_producto($idproducto,$idimagen,$combinado=FALSE)
 	{
-		unlink($this->_dir.$_POST['galeria_imagen']);
-		if($this->_para_texto===false) unlink($this->_thumb_dir.$_POST['galeria_imagen']);
+		$final="";
+		$final_s="";
+		if ($combinado===TRUE) {
+			$final="_combinado";
+			$final_s="_combinados";
+		}
+		$img_prod=new Mysql;
+		$sql="INSERT INTO imagenes{$final_s} SET idproducto{$final}={$idproducto}, idimagen=$idimagen;";
+		if(!$img_prod->resultado_consulta($sql)) {  
+			$this->_resultado("No se ha podido esteblecer la conexión entre la imagen y el producto correctamente.");
+			if($combinado===FALSE) $this->_eliminar_imagenes($idimagen);
+		}
+	}
+	
+	protected function _eliminar_imagenes($idimagen)
+	{
+		$elim_img = new Mysql;
+		$sql_eliminar ="DELETE FROM imagenes WHERE idimagen='$idimagen';";
+		$sql_fichero ="SELECT imagen FROM imagenes WHERE idimagen='$idimagen';";
+		$elim_img->ejecutar_consulta($sql_fichero);
+		@unlink($this->_config['imagenes_prod_thumbs'].$elim_img->registros[0]->imagen);
+		@unlink($this->_config['imagenes_prod_media'].$elim_img->registros[0]->imagen);
+		@unlink($this->_config['imagenes_prod_grande'].$elim_img->registros[0]->imagen);
+		$elim_img->resultado_consulta($sql_eliminar);
+	}
+	
+	public function eliminar($idimagen)
+	{
+		//una cosa es elimar la imagen y otra elimar la relacion....
+	}
+	
+	public function ordenar()
+	{
+		//a terminar
 	}
 	
 }

@@ -4,6 +4,8 @@ class Subir_archivo
 {
 	public $error = false;
 	public $error_txt;
+	public $nombre;
+	
 	protected $_nombre;
 	
 	//es obligatoria no sabemos cual es el raiz
@@ -44,13 +46,19 @@ class Subir_archivo
 					$this->_nombre = implode('', $partes);
 				}
 			}
-			$this->_carpeta = $carpeta;
+			$this->_carpeta($carpeta);
 			$this->_nombre();
 		} else {
 			$this->error = true;
 			$this->error_txt = '<p>No se ha podido subir el archivo. Inténtelo de nuevo.</p>';
 		}
 
+	}
+	
+	protected function _carpeta($carpeta)
+	{
+		$this->_carpeta=$carpeta;
+		if(strstr(substr($carpeta, -1), '/') !== FALSE) $this->_carpeta=substr($carpeta, 0, -1);	
 	}
 	
 	protected function _comprobaciones() 
@@ -92,6 +100,8 @@ class Subir_archivo
 		 if(!move_uploaded_file($this->_archivo['tmp_name'],$this->_carpeta . self::SEPARADOR . $this->_nombre)) {
 		 	$this->error = true;
 		 	$this->error_txt = '<p>No se puede mover el archivo a: ' . $this->_carpeta . self::SEPARADOR . $this->_nombre . '.</p>';
+		 } else {
+		 	$this->nombre = $this->_nombre;
 		 }
 	}
 	
@@ -126,6 +136,7 @@ class Subir_imagen extends Subir_archivo
 	private $_alto;
 	private $_ancho;
 	private $_porporcional;
+	private $_recorte;
 	
 	//Es la extensión o el tipo de imagen con la que queremos la
 	//imagen de salida desopues de haberla creado. Por degecto ponemos
@@ -134,7 +145,7 @@ class Subir_imagen extends Subir_archivo
 	private $_ext_salida;
 	
 	
-	public function __construct($archivo, $carpeta, $nombre = NULL, $alto = NULL, $ancho = NULL, $proporcional = true, $ext_salida = NULL, $tamano_max = NULL, $ext_mime = array()) 
+	public function __construct($archivo, $carpeta, $nombre = NULL, $alto = NULL, $ancho = NULL, $proporcional = true, $recorte = false, $ext_salida = NULL, $tamano_max = NULL, $ext_mime = array()) 
 	{
 		//$_FILE['nombre_form'] = $archivo
 		$this->_archivo = $archivo;	
@@ -151,10 +162,11 @@ class Subir_imagen extends Subir_archivo
 			
 			if($ext_salida) $this->_ext_salida = $ext_salida;
 			
-			$this->_carpeta = $carpeta;
+			parent::_carpeta($carpeta);
 			$this->_alto = $alto;
 			$this->_ancho = $ancho;
 			$this->_proporcional = $proporcional;
+			$this->_recorte = $recorte;
 			$this->_nombre();
 		} else {
 			$this->error = true;
@@ -190,6 +202,10 @@ class Subir_imagen extends Subir_archivo
 				//echo 'porp';
 				$nuevo_ancho = $ancho/max($ancho/$this->_ancho,$alto/$this->_alto);
 				$nuevo_alto = $alto/max($ancho/$this->_ancho,$alto/$this->_alto);
+				if($this->_recorte === true) {
+					$nuevo_ancho = $ancho/min($ancho/$this->_ancho,$alto/$this->_alto);
+					$nuevo_alto = $alto/min($ancho/$this->_ancho,$alto/$this->_alto);
+				}
 			} else {
 				//echo 'no prop';
 				$nuevo_ancho = $this->_ancho;
@@ -213,17 +229,36 @@ class Subir_imagen extends Subir_archivo
 			}
 		}
 		
+		$imagen_original = $this->_imagen_original($mime,$this->_archivo['tmp_name']);
+		$archivo_salida = $this->_imagen_redimensionada($imagen_original,$ancho,$alto,$nuevo_ancho,$nuevo_alto);
+		if($archivo_salida && $this->_recorte === true) {
+			$imagen_original = $this->_imagen_original($mime,$this->_carpeta . parent::SEPARADOR . $this->_nombre . '.' . $this->_ext_salida);
+			//var_dump($imagen_original);
+			$archivo_salida = $this->_imagen_recortada($imagen_original,$nuevo_ancho,$nuevo_alto);
+		}	
+
+		if(!$archivo_salida)	{
+			$this->error = true;
+			$this->error_txt = '<p>No se ha podido redimensionar la imagen. Inténtelo de nuevo.</p>';
+		} else {
+			$this->nombre=$this->_nombre . '.' . $this->_ext_salida;
+		}
+		
+	}
+	
+	private function _imagen_original($mime,$img) 
+	{
 		switch($mime){
       	case "image/jpeg":
-				$imagen_original = imagecreatefromjpeg($this->_archivo['tmp_name']); //jpeg file
+				$imagen_original = imagecreatefromjpeg($img); //jpeg file
 				if(!$this->_ext_salida) $this->_ext_salida = 'jpg';
 				break;
         	case "image/gif":
-            $imagen_original = imagecreatefromgif($this->_archivo['tmp_name']); //gif file
+            $imagen_original = imagecreatefromgif($img); //gif file
             if(!$this->_ext_salida) $this->_ext_salida = 'gif';
 	      	break;
 	      case "image/png":
-				$imagen_original = imagecreatefrompng($this->_archivo['tmp_name']); //png file
+				$imagen_original = imagecreatefrompng($img); //png file
 				if(!$this->_ext_salida) $this->_ext_salida = 'png';
 	      	break;
 	    	default:
@@ -232,8 +267,13 @@ class Subir_imagen extends Subir_archivo
 	    		break;
 		}
 		
+		return $imagen_original;
+	}
+	
+	private function _imagen_redimensionada($imagen_original,$ancho,$alto,$nuevo_ancho,$nuevo_alto) 
+	{
 		$imagen = imagecreatetruecolor($nuevo_ancho, $nuevo_alto);
-		if(imagecopyresampled($imagen, $imagen_original, 0, 0, 0, 0, $nuevo_ancho, $nuevo_alto, $ancho, $alto)) {		
+		if(imagecopyresampled($imagen, $imagen_original, 0, 0, 0, 0, $nuevo_ancho, $nuevo_alto, $ancho, $alto)) {
 			switch($this->_ext_salida){
 	      	case "jpg":
 					$archivo_salida = imagejpeg($imagen, $this->_carpeta . parent::SEPARADOR . $this->_nombre . '.' . $this->_ext_salida);
@@ -250,13 +290,37 @@ class Subir_imagen extends Subir_archivo
 			}
 		}
 		imagedestroy($imagen);
+		return $archivo_salida;
+	}
+	
+	private function _imagen_recortada($imagen_original,$nuevo_ancho,$nuevo_alto) 
+	{
 
-		if(!$archivo_salida)	{
-			$this->error = true;
-			$this->error_txt = '<p>No se ha podido redimensionar la imagen. Inténtelo de nuevo.</p>';
+		$x = ($nuevo_ancho-$this->_ancho)/2;
+		$y = ($nuevo_alto-$this->_alto)/2;
+		
+		$imagen = imagecreatetruecolor($this->_ancho, $this->_alto);
+		if(imagecopy($imagen, $imagen_original, 0, 0, $x, $y, $this->_ancho, $this->_alto)) {
+			switch($this->_ext_salida){
+	      	case "jpg":
+					$archivo_salida = imagejpeg($imagen, $this->_carpeta . parent::SEPARADOR . $this->_nombre . '.' . $this->_ext_salida);
+					break;
+	        	case "gif":
+	            $archivo_salida = imagegif($imagen, $this->_carpeta . parent::SEPARADOR . $this->_nombre . '.' . $this->_ext_salida);
+		      	break;
+		      case "png":
+					$archivo_salida = imagepng($imagen, $this->_carpeta . parent::SEPARADOR . $this->_nombre . '.' . $this->_ext_salida);
+		      	break;
+		      default:
+					$archivo_salida = false;
+		      	break;
+			}
 		}
+		imagedestroy($imagen);
+		return $archivo_salida;
 		
 	}
+	
 	
 	/****************************************************************************************************
 	queda pendinete de momento el hacer:

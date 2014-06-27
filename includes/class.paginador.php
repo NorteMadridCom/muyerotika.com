@@ -13,13 +13,13 @@ class Paginador
 	/* --------EJEMPLO DE USO ----------
 	$productos_Actualizados es el resultado con todos los datos, matriz u objetos
 	$productos_actualizados_pag = new Paginador($productos_actualizados,15);
-		if(!$productos_actualizados_pag->error) {
-			echo '<div id="productos">';
-			$menuproductos = new Productos($config,$productos_actualizados_pag->resultado[$_GET['index']],'cuadro_producto');
-			$menuproductos->poner_submenu();
-			echo '</div>';
-		}
-		$productos_actualizados_pag->poner_indices();
+	if(!$productos_actualizados_pag->error) {
+		echo '<div id="productos">';
+		$menuproductos = new Productos($config,$productos_actualizados_pag->resultado[$_GET['index']],'cuadro_producto');
+		$menuproductos->poner_submenu();
+		echo '</div>';
+	}
+	$productos_actualizados_pag->poner_indices();
 	*/
 	
 	
@@ -84,7 +84,6 @@ class Paginador
 				//se llama $objeto->resultado[$_GET[index]] en la pag donde queremos ponerla
 				unset($this->resultado);
 				$matriz_a_partir = $datos[$matriz_en_objeto];
-				//var_dump($matriz_a_partir);
 				unset($datos[$matriz_en_objeto]);
 				$almacenado = $datos;
 				$matriz_partida = array_chunk($matriz_a_partir, $datos_pagina, $indices_en_objeto);
@@ -94,7 +93,6 @@ class Paginador
 					$objeto[$matriz_en_objeto] = $parte;
 					$this->resultado[] = (object) $objeto;
 				}
-				//var_dump($this->resultado);
 			}
 			
 		} else {
@@ -129,6 +127,7 @@ class Paginador
 			$actual=$_GET['index'];
 		}
 		
+		
 		if($this->paginas>1) {
 		
 			$ult = $this->paginas - 1;
@@ -137,20 +136,21 @@ class Paginador
 			
 			unset($_GET['index']);
 			foreach($_GET as $clave => $valor) {
-				$argumento[] = "$clave=$valor";
+				$valor_decodificado = urlencode($valor);
+				$argumento[] = "$clave=$valor_decodificado";
 			}
-			if(count($argumento)>0) $argumentos=implode('&', $argumento);
+			$argumentos=implode('&', $argumento);
 			$url = $_SERVER['PHP_SELF']."?".$argumentos;			
-			$ini = '<a href="'.$url.'&index=';
-
+			$ini = '<a class="paginador" href="'.$url.'&index=';
+			
 			if($actual>0) {		
-				$primero = $ini.'0"> << </a>';
-				$anterior = $ini . $ant . '"> < </a>';
+				$primero = $ini.'0"><span class="flechas_paginador"> << </span></a>';
+				$anterior = $ini . $ant . '"><span class="flechas_paginador"> < </span></a>';
 			}
 			
 			if($actual<$this->paginas) {
-				$ultimo = $ini. $ult.'"> >> </a>';		
-				$siguiente = $ini. $sig .'"> > </a>';
+				$ultimo = $ini. $ult.'"><span class="flechas_paginador"> >> </span></a>';		
+				$siguiente = $ini. $sig .'"><span class="flechas_paginador"> > </span></a>';
 			}
 			
 			$lim = $this->_grupo +1;

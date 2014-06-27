@@ -44,6 +44,8 @@ class Html_mail
 			} else $this->error="No hay remitente del mensaje.";
 		}
 		
+		$asunto = utf8_encode("=?UTF-8?B?" . base64_encode($asunto) .  "?=");
+		
 		if(!$this->error) {
 			if( !mail($dest, $asunto, $this->_mensaje($mensaje_html), $this->_cabeceras($remite,$resp_a)) ) $this->error="No se ha podido enviar el correo electrónico.";
 		}
@@ -54,8 +56,9 @@ class Html_mail
 	
 	private function _cabeceras($remite,$resp_a)
 	{		
-		$headers = "From: $remite\r\nReply-To: $resp_a";
-		$headers .= "\r\nContent-Type: multipart/alternative; boundary=\"PHP-alt-".$this->_hash."\"";
+		$headers = "MIME-Version: 1.0\n";
+		$headers .= "From: $remite\nReply-To: $resp_a\n";
+		$headers .= "Content-Type: multipart/alternative; boundary=\"PHP-alt-".$this->_hash."\"\n";
 		return $headers;
 	}
 	

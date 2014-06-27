@@ -50,7 +50,6 @@ require_once 'disponibilidad.php';
 require_once 'editar_envios.php';
 
 
-
 $config = new Config(); //extends de mysql con las propiedades para la configuracion
 //$config->conf[variable]
 

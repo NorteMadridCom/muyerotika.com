@@ -9,8 +9,6 @@ class Validar_datos
 	private $_valor;
 	public $error;
 	public $formateado;
-	public $fechaunix;
-	public $fechasql;
 	
 	public function __construct($tipo, $valor, $obligatorio=true, $patron=false) 
 	{
@@ -246,7 +244,7 @@ class Validar_datos
 			_hora();
 		}
 		
-		if(preg_match('#^[0-9]{6,8}$#', $fecha)) { //formato seguido
+		if(preg_match('#^[0-9]{6,8}$#', $fecha)) {
 			if(strlen($fecha)==6) {
 				$ano = '20' . substr($fecha, -2);
 			} elseif(strlen($fecha)==8) {
@@ -257,17 +255,7 @@ class Validar_datos
 			$dia = substr($fecha, 0, 2);
 			$mes = substr($fecha, 2, 2);
 			
-		} elseif(preg_match('#^[0-9]{2,4}-[0-9]{1,2}-[0-9]{1,2}$#', $fecha)) { //formato fecha sql
-			$separador = "-";
-			$matriz_fecha = explode($separador, $fecha);
-			if(count($matriz_fecha)!=3 || strlen($matriz_fecha[2])==3) {
-				$this->error = true;
-			} else {
-				$dia = $matriz_fecha[2];
-				$mes = $matriz_fecha[1];
-				$ano = $matriz_fecha[0];
-			}
-		} elseif(preg_match('#^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2,4}$#', $fecha)) { //formato fecha española
+		} elseif(preg_match('#^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2,4}$#', $fecha)) {
 			$separador = $fecha[2];
 			$matriz_fecha = explode($separador, $fecha);
 			if(count($matriz_fecha)!=3 || strlen($matriz_fecha[2])==3) {
@@ -310,8 +298,8 @@ class Validar_datos
 			} else {
 				$this->error = true;
 			}
-			$dia = substr($fecha, 0, 2);
-			$mes = substr($fecha, 2, 2);
+			$mes = substr($fecha, 0, 2);
+			$dia = substr($fecha, 2, 2);
 			
 		} elseif(preg_match('#^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2,4}$#', $fecha)) {
 			$separador = $fecha[2];
@@ -319,8 +307,8 @@ class Validar_datos
 			if(count($matriz_fecha)!=3 || strlen($matriz_fecha[2])==3) {
 				$this->error = true;
 			} else {
-				$dia = $matriz_fecha[0];
-				$mes = $matriz_fecha[1];
+				$mes = $matriz_fecha[0];
+				$dia = $matriz_fecha[1];
 				$ano = $matriz_fecha[2];
 			}
 		} else {
@@ -331,7 +319,6 @@ class Validar_datos
 			if(checkdate($mes, $dia, $ano)) {
 				$this->formateado = $mes.$divisor.$dia.$divisor.$ano;
 				$this->fechaunix = mktime($hour = null, $minute = null, $second = null, $mes, $dia, $ano);
-				$this->fechasql = "$ano-$mes-$dia $hora";
 			} else {
 				$this->error = true;
 			}
